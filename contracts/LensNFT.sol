@@ -37,4 +37,4 @@ contract LensNFT is ERC721, Ownable {
         (bool success, ) = payable(owner()).call{value: balance}("");
         require(success, "Error al retirar fondos");
     }
-} 
+}

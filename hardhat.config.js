@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@matterlabs/hardhat-zksync");
 require("dotenv").config();
+require("./scripts/manage.js");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
