@@ -22,10 +22,25 @@ contract CarNFT is ERC721, Ownable {
     event PartReplaced(uint256 indexed carId, uint256 oldPartId, uint256 newPartId);
     event WorkshopSet(address indexed workshop);
     event LeaderboardSet(address indexed leaderboard);
+    event MintPriceChanged(uint256 newPrice);
+
+    uint256 public mintPrice;
 
     constructor(address _carPartContractAddress) ERC721("CarNFT", "CAR") Ownable(msg.sender) {
         carPartContract = CarPart(_carPartContractAddress);
         _currentCarId = 1;
+        mintPrice = 0.01 ether; // Precio inicial de acuñación
+    }
+
+    function setMintPrice(uint256 _newPrice) external onlyOwner {
+        mintPrice = _newPrice;
+        emit MintPriceChanged(_newPrice);
+    }
+
+    function withdrawFunds() external onlyOwner {
+        uint256 balance = address(this).balance;
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        require(success, "Error al retirar los fondos");
     }
 
     struct PartData {
@@ -36,7 +51,8 @@ contract CarNFT is ERC721, Ownable {
         string imageURI;
     }
 
-    function mintCar(string memory carImageURI, PartData[] calldata partsData) external {
+    function mintCar(string memory carImageURI, PartData[] calldata partsData) external payable {
+        require(msg.value >= mintPrice, "Pago insuficiente para acunar el carro");
         require(partsData.length == 3, "Un carro debe tener exactamente 3 partes");
         
         uint256 carId = _currentCarId;

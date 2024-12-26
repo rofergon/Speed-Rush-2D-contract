@@ -3,8 +3,8 @@ const { Deployer } = require("@matterlabs/hardhat-zksync-deploy");
 const hre = require("hardhat");
 
 async function main() {
-    // Deployed CarNFT contract address
-    const CAR_NFT_ADDRESS = "0xEd0fA4fFDB1B33B6D6c6611B77F6806DB50b21aE";
+    // Recently deployed CarNFT contract address
+    const CAR_NFT_ADDRESS = "0x33Cf5229318c39d7F754ccbB8FAf61c6470e85dc";
 
     // Initialize provider and wallet
     const provider = new Provider("https://rpc.testnet.lens.dev");
@@ -18,34 +18,42 @@ async function main() {
     console.log("Testing mintCar with contract at:", CAR_NFT_ADDRESS);
 
     // Test data for the car
-    const carImageURI = "https://example.com/car1.jpg";
+    const carImageURI = "https://example.com/car2.jpg";
     
-    // Create array of car parts with their main stats
+    // Array of car parts with their main stats
     const partsData = [
         {
             partType: 0, // ENGINE (speed, max speed, acceleration)
-            stat1: 8,    // speed
-            stat2: 9,    // max speed
-            stat3: 7,    // acceleration
-            imageURI: "https://example.com/engine1.jpg"
+            stat1: 9,    // speed
+            stat2: 10,   // max speed
+            stat3: 8,    // acceleration
+            imageURI: "https://example.com/engine2.jpg"
         },
         {
             partType: 1, // TRANSMISSION (acceleration, speed, handling)
-            stat1: 8,    // acceleration
-            stat2: 7,    // speed
-            stat3: 8,    // handling
-            imageURI: "https://example.com/transmission1.jpg"
+            stat1: 9,    // acceleration
+            stat2: 8,    // speed
+            stat3: 9,    // handling
+            imageURI: "https://example.com/transmission2.jpg"
         },
         {
             partType: 2, // WHEELS (handling, drift, turn)
-            stat1: 9,    // handling
-            stat2: 7,    // drift
-            stat3: 8,    // turn
-            imageURI: "https://example.com/wheels1.jpg"
+            stat1: 10,   // handling
+            stat2: 8,    // drift
+            stat3: 9,    // turn
+            imageURI: "https://example.com/wheels2.jpg"
         }
     ];
 
     try {
+        // Get current mint price
+        const mintPrice = await carNFT.mintPrice();
+        console.log("\nMint price:", mintPrice.toString(), "wei");
+
+        // Get wallet balance before minting
+        const balanceAntes = await provider.getBalance(wallet.address);
+        console.log("Wallet balance before minting:", balanceAntes.toString(), "wei");
+
         console.log("\nAttempting to mint a new car...");
         console.log("\nPart Details:");
         console.log("\nEngine:");
@@ -63,14 +71,46 @@ async function main() {
         console.log("- Drift:", partsData[2].stat2);
         console.log("- Turn:", partsData[2].stat3);
 
-        const tx = await carNFT.mintCar(carImageURI, partsData);
+        // Estimate required gas
+        const gasEstimado = await carNFT.mintCar.estimateGas(carImageURI, partsData, {
+            value: mintPrice
+        });
+        console.log("\nEstimated gas:", gasEstimado.toString());
+
+        // Get gas price
+        const gasPrice = await provider.getGasPrice();
+        console.log("Gas price:", gasPrice.toString(), "wei");
+
+        // Calculate total cost (mint price + gas)
+        const costoGas = BigInt(gasEstimado) * BigInt(gasPrice);
+        console.log("Gas cost:", costoGas.toString(), "wei");
+        console.log("Total cost (mint + gas):", (BigInt(mintPrice) + costoGas).toString(), "wei");
+
+        // Mint the car sending required value
+        const tx = await carNFT.mintCar(carImageURI, partsData, {
+            value: mintPrice,
+            gasLimit: BigInt(Math.floor(Number(gasEstimado) * 1.1)) // Add 10% margin
+        });
         console.log("\nTransaction sent:", tx.hash);
         
-        await tx.wait();
-        console.log("Car minted successfully!");
+        // Wait for confirmation and get receipt
+        const receipt = await tx.wait();
+        console.log("\nTransaction confirmed!");
+        console.log("Gas used:", receipt.gasUsed?.toString() || "N/A");
+        console.log("Effective gas price:", receipt.effectiveGasPrice?.toString() || "N/A");
+        
+        const costoGasReal = receipt.gasUsed && receipt.effectiveGasPrice ? 
+            (BigInt(receipt.gasUsed) * BigInt(receipt.effectiveGasPrice)).toString() : 
+            "Not available";
+        console.log("Total gas cost:", costoGasReal, "wei");
 
-        // Get car ID (will be 1 since it's the first one)
-        const carId = 1;
+        // Get balance after minting
+        const balanceDespues = await provider.getBalance(wallet.address);
+        console.log("\nWallet balance after minting:", balanceDespues.toString(), "wei");
+        console.log("Total operation cost:", (balanceAntes - balanceDespues).toString(), "wei");
+
+        // Get the last minted car ID
+        const carId = 2; // This will be the second car
         console.log("\nGetting stats for car ID:", carId);
 
         // Get and display car stats

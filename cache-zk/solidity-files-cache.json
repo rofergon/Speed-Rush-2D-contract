@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\contracts\\CarNFT.sol": {
-      "lastModificationDate": 1735188769771,
-      "contentHash": "6c070b17ebebfc2c00fa472cfd03bd88",
+      "lastModificationDate": 1735191945122,
+      "contentHash": "d9a1eecc067e83817670278bbbb6fe49",
       "sourceName": "contracts/CarNFT.sol",
       "solcConfig": {
         "version": "0.8.20",
