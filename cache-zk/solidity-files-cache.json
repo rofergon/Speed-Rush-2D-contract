@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\contracts\\CarNFT.sol": {
-      "lastModificationDate": 1735186197673,
-      "contentHash": "1292376a3eb9c21475e69e103658a44b",
+      "lastModificationDate": 1735188769771,
+      "contentHash": "6c070b17ebebfc2c00fa472cfd03bd88",
       "sourceName": "contracts/CarNFT.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -52,7 +52,6 @@
       },
       "imports": [
         "@openzeppelin/contracts/token/ERC721/ERC721.sol",
-        "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
         "@openzeppelin/contracts/access/Ownable.sol",
         "./CarPart.sol"
       ],
@@ -64,8 +63,8 @@
       ]
     },
     "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\contracts\\CarPart.sol": {
-      "lastModificationDate": 1735185362719,
-      "contentHash": "ad646e7336b855fc2ee5a4d49f6d43e7",
+      "lastModificationDate": 1735188965877,
+      "contentHash": "eb72e6bd7ec4d431bf9b4fc9195260ad",
       "sourceName": "contracts/CarPart.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -114,7 +113,6 @@
       },
       "imports": [
         "@openzeppelin/contracts/token/ERC721/ERC721.sol",
-        "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
         "@openzeppelin/contracts/access/Ownable.sol"
       ],
       "versionPragmas": [
@@ -246,68 +244,6 @@
       ],
       "artifacts": [
         "ERC721"
-      ]
-    },
-    "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\extensions\\ERC721URIStorage.sol": {
-      "lastModificationDate": 1735186871252,
-      "contentHash": "ba4a727732c179b4dfd6f8846c52c856",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "mode": "3"
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "detectMissingLibraries": false,
-          "forceEVMLA": false,
-          "enableEraVMExtensions": false,
-          "libraries": {}
-        },
-        "eraVersion": "1.0.1",
-        "zksolc": {
-          "version": "1.5.8",
-          "compilerSource": "binary",
-          "settings": {
-            "optimizer": {
-              "enabled": true,
-              "mode": "3"
-            },
-            "compilerPath": "C:\\Users\\sebas\\AppData\\Local\\hardhat-nodejs\\Cache\\compilers-v2\\zksolc\\zksolc-v1.5.8",
-            "missingLibrariesPath": "./.zksolc-libraries-cache/missingLibraryDependencies.json",
-            "areLibrariesMissing": false,
-            "experimental": {},
-            "libraries": {},
-            "enableEraVMExtensions": false,
-            "codegen": "evmla",
-            "forceEVMLA": false
-          }
-        }
-      },
-      "imports": [
-        "../ERC721.sol",
-        "../../../utils/Strings.sol",
-        "../../../interfaces/IERC4906.sol",
-        "../../../interfaces/IERC165.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ERC721URIStorage"
       ]
     },
     "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
@@ -1070,180 +1006,6 @@
         "IERC721Receiver"
       ]
     },
-    "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC4906.sol": {
-      "lastModificationDate": 1735186871292,
-      "contentHash": "273c26c9c728a6052d1175ace81d10b4",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC4906.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "mode": "3"
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "detectMissingLibraries": false,
-          "forceEVMLA": false,
-          "enableEraVMExtensions": false,
-          "libraries": {}
-        },
-        "eraVersion": "1.0.1",
-        "zksolc": {
-          "version": "1.5.8",
-          "compilerSource": "binary",
-          "settings": {
-            "optimizer": {
-              "enabled": true,
-              "mode": "3"
-            },
-            "compilerPath": "C:\\Users\\sebas\\AppData\\Local\\hardhat-nodejs\\Cache\\compilers-v2\\zksolc\\zksolc-v1.5.8",
-            "missingLibrariesPath": "./.zksolc-libraries-cache/missingLibraryDependencies.json",
-            "areLibrariesMissing": false,
-            "experimental": {},
-            "libraries": {},
-            "enableEraVMExtensions": false,
-            "codegen": "evmla",
-            "forceEVMLA": false
-          }
-        }
-      },
-      "imports": [
-        "./IERC165.sol",
-        "./IERC721.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC4906"
-      ]
-    },
-    "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC165.sol": {
-      "lastModificationDate": 1735186871282,
-      "contentHash": "f808b485ee0cdc6768ee8385ae5f9a2a",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC165.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "mode": "3"
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "detectMissingLibraries": false,
-          "forceEVMLA": false,
-          "enableEraVMExtensions": false,
-          "libraries": {}
-        },
-        "eraVersion": "1.0.1",
-        "zksolc": {
-          "version": "1.5.8",
-          "compilerSource": "binary",
-          "settings": {
-            "optimizer": {
-              "enabled": true,
-              "mode": "3"
-            },
-            "compilerPath": "C:\\Users\\sebas\\AppData\\Local\\hardhat-nodejs\\Cache\\compilers-v2\\zksolc\\zksolc-v1.5.8",
-            "missingLibrariesPath": "./.zksolc-libraries-cache/missingLibraryDependencies.json",
-            "areLibrariesMissing": false,
-            "experimental": {},
-            "libraries": {},
-            "enableEraVMExtensions": false,
-            "codegen": "evmla",
-            "forceEVMLA": false
-          }
-        }
-      },
-      "imports": [
-        "../utils/introspection/IERC165.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": []
-    },
-    "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\node_modules\\@openzeppelin\\contracts\\interfaces\\IERC721.sol": {
-      "lastModificationDate": 1735186871292,
-      "contentHash": "d8d23fc2f55ed934d1a1b91c9afd8526",
-      "sourceName": "@openzeppelin/contracts/interfaces/IERC721.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "mode": "3"
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "detectMissingLibraries": false,
-          "forceEVMLA": false,
-          "enableEraVMExtensions": false,
-          "libraries": {}
-        },
-        "eraVersion": "1.0.1",
-        "zksolc": {
-          "version": "1.5.8",
-          "compilerSource": "binary",
-          "settings": {
-            "optimizer": {
-              "enabled": true,
-              "mode": "3"
-            },
-            "compilerPath": "C:\\Users\\sebas\\AppData\\Local\\hardhat-nodejs\\Cache\\compilers-v2\\zksolc\\zksolc-v1.5.8",
-            "missingLibrariesPath": "./.zksolc-libraries-cache/missingLibraryDependencies.json",
-            "areLibrariesMissing": false,
-            "experimental": {},
-            "libraries": {},
-            "enableEraVMExtensions": false,
-            "codegen": "evmla",
-            "forceEVMLA": false
-          }
-        }
-      },
-      "imports": [
-        "../token/ERC721/IERC721.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": []
-    },
     "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\contracts\\RaceLeaderboard.sol": {
       "lastModificationDate": 1735186197666,
       "contentHash": "b541347a9f5fa2323c0ea90c8cdbb61e",
@@ -1306,8 +1068,8 @@
       ]
     },
     "C:\\Users\\sebas\\OneDrive\\Documentos\\gitlab\\cartest1\\Speed-Rush-2D contract\\contracts\\CarWorkshop.sol": {
-      "lastModificationDate": 1735187426399,
-      "contentHash": "feba441ebf1cb411e504edd74b6735f2",
+      "lastModificationDate": 1735188356597,
+      "contentHash": "26f4928fe32d9b66dbb058e060af9aa7",
       "sourceName": "contracts/CarWorkshop.sol",
       "solcConfig": {
         "version": "0.8.20",
