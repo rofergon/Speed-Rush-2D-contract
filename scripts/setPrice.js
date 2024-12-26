@@ -6,7 +6,7 @@ const CONTRACT_ADDRESS = "0x51D967b80eaD6601630E0fA18b2101b90f1AB1d0";
 
 async function main() {
     if (!process.argv[2]) {
-        console.error("Por favor especifica el nuevo precio en GRASS");
+        console.error("Please specify the new price in GRASS");
         process.exit(1);
     }
 
@@ -16,10 +16,10 @@ async function main() {
     const artifact = require("../artifacts-zk/contracts/LensNFT.sol/LensNFT.json");
     const contract = new ethers.Contract(CONTRACT_ADDRESS, artifact.abi, wallet);
 
-    console.log(`Cambiando precio de minteo a ${newPrice} GRASS...`);
+    console.log(`Changing mint price to ${newPrice} GRASS...`);
     const tx = await contract.setMintPrice(ethers.parseEther(newPrice));
     await tx.wait();
-    console.log("Precio actualizado exitosamente");
+    console.log("Price updated successfully");
 }
 
 main()

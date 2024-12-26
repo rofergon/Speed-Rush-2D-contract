@@ -10,10 +10,10 @@ async function main() {
     const artifact = require("../artifacts-zk/contracts/LensNFT.sol/LensNFT.json");
     const contract = new ethers.Contract(CONTRACT_ADDRESS, artifact.abi, wallet);
 
-    console.log("Retirando fondos del contrato...");
+    console.log("Withdrawing funds from contract...");
     const tx = await contract.withdraw();
     await tx.wait();
-    console.log("Fondos retirados exitosamente");
+    console.log("Funds withdrawn successfully");
 }
 
 main()

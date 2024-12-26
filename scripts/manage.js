@@ -10,19 +10,19 @@ async function main() {
     const artifact = require("../artifacts-zk/contracts/LensNFT.sol/LensNFT.json");
     const contract = new ethers.Contract(CONTRACT_ADDRESS, artifact.abi, wallet);
 
-    // Obtener información del contrato
+    // Get contract information
     const mintPrice = await contract.MINT_PRICE();
     const baseURI = await contract.baseTokenURI();
     const owner = await contract.owner();
     const balance = await provider.getBalance(CONTRACT_ADDRESS);
 
-    console.log("Información del contrato:");
+    console.log("Contract Information:");
     console.log("------------------------");
-    console.log(`Dirección: ${CONTRACT_ADDRESS}`);
-    console.log(`Precio de minteo: ${ethers.formatEther(mintPrice)} GRASS`);
+    console.log(`Address: ${CONTRACT_ADDRESS}`);
+    console.log(`Mint Price: ${ethers.formatEther(mintPrice)} GRASS`);
     console.log(`Base URI: ${baseURI}`);
-    console.log(`Propietario: ${owner}`);
-    console.log(`Balance del contrato: ${ethers.formatEther(balance)} GRASS`);
+    console.log(`Owner: ${owner}`);
+    console.log(`Contract Balance: ${ethers.formatEther(balance)} GRASS`);
 }
 
 main()

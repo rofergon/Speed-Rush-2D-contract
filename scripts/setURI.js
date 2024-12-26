@@ -6,7 +6,7 @@ const CONTRACT_ADDRESS = "0x51D967b80eaD6601630E0fA18b2101b90f1AB1d0";
 
 async function main() {
     if (!process.argv[2]) {
-        console.error("Por favor especifica la nueva URI base");
+        console.error("Please specify the new base URI");
         process.exit(1);
     }
 
@@ -16,10 +16,10 @@ async function main() {
     const artifact = require("../artifacts-zk/contracts/LensNFT.sol/LensNFT.json");
     const contract = new ethers.Contract(CONTRACT_ADDRESS, artifact.abi, wallet);
 
-    console.log(`Estableciendo nueva baseURI: ${newURI}`);
+    console.log(`Setting new baseURI: ${newURI}`);
     const tx = await contract.setBaseURI(newURI);
     await tx.wait();
-    console.log("BaseURI actualizada exitosamente");
+    console.log("BaseURI updated successfully");
 }
 
 main()
