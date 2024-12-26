@@ -1,53 +1,78 @@
+const { Wallet } = require("zksync-ethers");
 const { Deployer } = require("@matterlabs/hardhat-zksync-deploy");
-const { Wallet, Provider } = require("zksync-ethers");
+const { HardhatRuntimeEnvironment } = require("hardhat/types");
 const hre = require("hardhat");
-require("dotenv").config();
 
 async function main() {
-  console.log("Obteniendo wallet...");
-  
-  // Inicializar el deployer
-  const provider = new Provider("https://rpc.testnet.lens.dev");
-  const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
+  console.log("Iniciando despliegue en zkSync Era...");
+
+  // Inicializar el wallet desde la private key en .env
+  const wallet = new Wallet(process.env.PRIVATE_KEY);
+  console.log("Desplegando contratos con la cuenta:", wallet.address);
+
+  // Crear el objeto deployer
   const deployer = new Deployer(hre, wallet);
 
-  console.log("Desplegando sistema con la cuenta:", wallet.address);
+  try {
+    // 1. Desplegar CarPart
+    console.log("Desplegando CarPart...");
+    const carPartArtifact = await deployer.loadArtifact("CarPart");
+    const carPart = await deployer.deploy(carPartArtifact);
+    await carPart.waitForDeployment();
+    const carPartAddress = await carPart.getAddress();
+    console.log("CarPart desplegado en:", carPartAddress);
 
-  // 1. Desplegar CarAccount (implementation)
-  console.log("Desplegando CarAccount (implementation)...");
-  const carAccount = await deployer.deploy(await deployer.loadArtifact("CarAccount"));
-  console.log("CarAccount desplegado en:", await carAccount.getAddress());
+    // 2. Desplegar CarNFT
+    console.log("Desplegando CarNFT...");
+    const carNFTArtifact = await deployer.loadArtifact("CarNFT");
+    const carNFT = await deployer.deploy(carNFTArtifact, [carPartAddress]);
+    await carNFT.waitForDeployment();
+    const carNFTAddress = await carNFT.getAddress();
+    console.log("CarNFT desplegado en:", carNFTAddress);
 
-  // 2. Desplegar CarNFT
-  console.log("Desplegando CarNFT...");
-  const carNFT = await deployer.deploy(await deployer.loadArtifact("CarNFT"));
-  console.log("CarNFT desplegado en:", await carNFT.getAddress());
+    // 3. Configurar CarPart para que conozca a CarNFT
+    console.log("Configurando CarPart...");
+    const tx1 = await carPart.setCarContract(carNFTAddress);
+    await tx1.wait();
+    console.log("CarPart configurado");
 
-  // 3. Desplegar ERC6551Registry
-  console.log("Desplegando ERC6551Registry...");
-  const registry = await deployer.deploy(await deployer.loadArtifact("ERC6551Registry"));
-  console.log("ERC6551Registry desplegado en:", await registry.getAddress());
+    // 4. Desplegar CarWorkshop
+    console.log("Desplegando CarWorkshop...");
+    const repairPrice = "100000000000000000"; // 0.1 ETH
+    const carWorkshopArtifact = await deployer.loadArtifact("CarWorkshop");
+    const carWorkshop = await deployer.deploy(carWorkshopArtifact, [carNFTAddress, repairPrice]);
+    await carWorkshop.waitForDeployment();
+    const carWorkshopAddress = await carWorkshop.getAddress();
+    console.log("CarWorkshop desplegado en:", carWorkshopAddress);
 
-  // 4. Desplegar CarFactory
-  console.log("Desplegando CarFactory...");
-  const carFactory = await deployer.deploy(
-    await deployer.loadArtifact("CarFactory"),
-    [await registry.getAddress(), await carAccount.getAddress(), await carNFT.getAddress()]
-  );
-  console.log("CarFactory desplegado en:", await carFactory.getAddress());
+    // 5. Desplegar RaceLeaderboard
+    console.log("Desplegando RaceLeaderboard...");
+    const raceLeaderboardArtifact = await deployer.loadArtifact("RaceLeaderboard");
+    const raceLeaderboard = await deployer.deploy(raceLeaderboardArtifact, [carNFTAddress]);
+    await raceLeaderboard.waitForDeployment();
+    const raceLeaderboardAddress = await raceLeaderboard.getAddress();
+    console.log("RaceLeaderboard desplegado en:", raceLeaderboardAddress);
 
-  // 5. Transferir ownership del CarNFT al CarFactory
-  console.log("Transfiriendo ownership de CarNFT al CarFactory...");
-  const tx = await carNFT.transferOwnership(await carFactory.getAddress());
-  await tx.wait();
-  console.log("Ownership transferido exitosamente");
+    // 6. Configurar CarNFT con las direcciones de Workshop y Leaderboard
+    console.log("Configurando CarNFT...");
+    const tx2 = await carNFT.setWorkshopContract(carWorkshopAddress);
+    await tx2.wait();
+    const tx3 = await carNFT.setLeaderboardContract(raceLeaderboardAddress);
+    await tx3.wait();
+    console.log("CarNFT configurado");
 
-  console.log("\nResumen del despliegue:");
-  console.log("------------------------");
-  console.log("CarAccount (implementation):", await carAccount.getAddress());
-  console.log("CarNFT:", await carNFT.getAddress());
-  console.log("ERC6551Registry:", await registry.getAddress());
-  console.log("CarFactory:", await carFactory.getAddress());
+    console.log("\nDirecciones de los contratos:");
+    console.log("CarPart:", carPartAddress);
+    console.log("CarNFT:", carNFTAddress);
+    console.log("CarWorkshop:", carWorkshopAddress);
+    console.log("RaceLeaderboard:", raceLeaderboardAddress);
+
+    // Guardar las direcciones para la verificación posterior
+    console.log("\nGuarda estas direcciones para la verificación de los contratos.");
+  } catch (error) {
+    console.error("Error detallado:", error);
+    throw error;
+  }
 }
 
 main()

@@ -121,6 +121,7 @@ contract CarNFT is ERC721URIStorage, Ownable {
         uint8 driftFactor;
         uint8 turnFactor;
         uint8 maxSpeed;
+        uint8 condition;
     }
 
     struct StatCalculation {
@@ -171,6 +172,40 @@ contract CarNFT is ERC721URIStorage, Ownable {
         calculations[5].weight += maxSpeedMult;
     }
 
+    mapping(uint256 => uint8) private _carConditions;
+    address public workshopContract;
+    address public leaderboardContract;
+
+    function setWorkshopContract(address _workshop) external onlyOwner {
+        workshopContract = _workshop;
+    }
+
+    function setLeaderboardContract(address _leaderboard) external onlyOwner {
+        leaderboardContract = _leaderboard;
+    }
+
+    function degradeCar(uint256 carId) external {
+        require(msg.sender == leaderboardContract, "Solo el contrato de leaderboard puede degradar carros");
+        require(exists(carId), "El carro no existe");
+        
+        if (_carConditions[carId] == 0) {
+            _carConditions[carId] = 100;
+        }
+        
+        if (_carConditions[carId] >= 5) {
+            _carConditions[carId] -= 5;
+        } else {
+            _carConditions[carId] = 0;
+        }
+    }
+
+    function repairCar(uint256 carId) public {
+        require(msg.sender == workshopContract, "Solo el taller puede reparar carros");
+        require(exists(carId), "El carro no existe");
+        
+        _carConditions[carId] = 100;
+    }
+
     function getCompactCarStats(uint256 carId) public view returns (CompactCarStats memory) {
         require(exists(carId), "Car does not exist");
         CarComposition storage comp = _cars[carId];
@@ -182,14 +217,20 @@ contract CarNFT is ERC721URIStorage, Ownable {
             _processPartStats(stats, calculations, stats.partType);
         }
 
+        uint8 condition = _carConditions[carId];
+        if (condition == 0) condition = 100;
+
+        uint256 multiplier = condition;
+        
         return CompactCarStats({
             imageURI: comp.carImageURI,
-            speed: uint8(calculations[0].total / calculations[0].weight),
-            acceleration: uint8(calculations[1].total / calculations[1].weight),
-            handling: uint8(calculations[2].total / calculations[2].weight),
-            driftFactor: uint8(calculations[3].total / calculations[3].weight),
-            turnFactor: uint8(calculations[4].total / calculations[4].weight),
-            maxSpeed: uint8(calculations[5].total / calculations[5].weight)
+            speed: uint8((calculations[0].total * multiplier) / (calculations[0].weight * 100)),
+            acceleration: uint8((calculations[1].total * multiplier) / (calculations[1].weight * 100)),
+            handling: uint8((calculations[2].total * multiplier) / (calculations[2].weight * 100)),
+            driftFactor: uint8((calculations[3].total * multiplier) / (calculations[3].weight * 100)),
+            turnFactor: uint8((calculations[4].total * multiplier) / (calculations[4].weight * 100)),
+            maxSpeed: uint8((calculations[5].total * multiplier) / (calculations[5].weight * 100)),
+            condition: condition
         });
     }
 }

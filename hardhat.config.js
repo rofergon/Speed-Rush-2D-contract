@@ -1,6 +1,5 @@
 require("@matterlabs/hardhat-zksync-solc");
 require("@matterlabs/hardhat-zksync-deploy");
-require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -19,23 +18,24 @@ module.exports = {
     settings: {
       libraries: {},
       enableEraVMExtensions: false,
+      codegen: "evmla",
       optimizer: {
         enabled: true,
         mode: '3'
       }
     }
   },
+  defaultNetwork: "lensTestnet",
   networks: {
+    hardhat: {
+      zksync: true
+    },
     lensTestnet: {
       url: "https://rpc.testnet.lens.dev",
       ethNetwork: "sepolia",
       zksync: true,
-      chainId: 37111,
       verifyURL: "https://block-explorer.testnet.lens.dev/contract_verification",
       accounts: [process.env.PRIVATE_KEY]
-    },
-    hardhat: {
-      zksync: true
     }
   }
 };
