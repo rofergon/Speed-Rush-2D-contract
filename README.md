@@ -1,137 +1,137 @@
-# Speed Rush 2D - Sistema de NFTs
+# Speed Rush 2D - NFT System
 
-Un sistema de NFTs para el juego Speed Rush 2D desplegado en la Lens Network Testnet que permite a los usuarios crear y personalizar carros usando partes NFT.
+An NFT system for the Speed Rush 2D game deployed on the Lens Network Testnet that allows users to create and customize cars using NFT parts.
 
-## Características
+## Features
 
-- Sistema de partes de carro como NFTs (Motor, Transmisión, Ruedas)
-- Sistema de estadísticas dinámico donde cada parte contribuye a múltiples atributos
-- Taller de reparación para mantener los carros en buen estado
-- Sistema de degradación de carros durante las carreras
-- Tabla de clasificación para competencias
+- Car parts as NFTs (Engine, Transmission, Wheels)
+- Dynamic stats system where each part contributes to multiple attributes
+- Repair workshop to maintain cars in good condition
+- Car degradation system during races
+- Race leaderboard system
 
-## Contratos Desplegados
+## Deployed Contracts
 
-Los contratos están desplegados en Lens Network Testnet en las siguientes direcciones:
+The contracts are deployed on Lens Network Testnet at the following addresses:
 - CarPart: `0x4bF1Cf69D3Cdc11dD7cBe0b1942Ce183f27FE402`
 - CarNFT: `0xEd0fA4fFDB1B33B6D6c6611B77F6806DB50b21aE`
 - CarWorkshop: `0x92cb777a96BE6f617959c8220388e4A046DA8669`
 - RaceLeaderboard: `0x9caEBCA084c2072904083008a0b3AE99068571b6`
 
-## Sistema de Estadísticas
+## Stats System
 
-### Motor (ENGINE)
-- stat1: Velocidad
-- stat2: Velocidad Máxima
-- stat3: Aceleración
+### Engine
+- stat1: Speed
+- stat2: Max Speed
+- stat3: Acceleration
 
-### Transmisión (TRANSMISSION)
-- stat1: Aceleración
-- stat2: Velocidad
-- stat3: Manejo
+### Transmission
+- stat1: Acceleration
+- stat2: Speed
+- stat3: Handling
 
-### Ruedas (WHEELS)
-- stat1: Manejo
-- stat2: Derrape
-- stat3: Giro
+### Wheels
+- stat1: Handling
+- stat2: Drift
+- stat3: Turn
 
-Cada estadística final del carro es afectada por al menos dos atributos de diferentes partes:
-- Velocidad: Motor (stat1) y Transmisión (stat2)
-- Velocidad Máxima: Motor (stat2) y Transmisión (stat1)
-- Aceleración: Motor (stat3) y Transmisión (stat1)
-- Manejo: Transmisión (stat3) y Ruedas (stat1)
-- Derrape: Ruedas (stat2) y Transmisión (stat3)
-- Giro: Ruedas (stat3) y Ruedas (stat2)
+Each final car statistic is affected by at least two attributes from different parts:
+- Speed: Engine (stat1) and Transmission (stat2)
+- Max Speed: Engine (stat2) and Transmission (stat1)
+- Acceleration: Engine (stat3) and Transmission (stat1)
+- Handling: Transmission (stat3) and Wheels (stat1)
+- Drift: Wheels (stat2) and Transmission (stat3)
+- Turn: Wheels (stat3) and Wheels (stat2)
 
-## Prerequisitos
+## Prerequisites
 
 - Node.js >= v16
-- npm o yarn
-- Una wallet con fondos en Lens Network Testnet
+- npm or yarn
+- A wallet with funds on Lens Network Testnet
 
-## Instalación
+## Installation
 
-1. Clonar el repositorio:
+1. Clone the repository:
 ```bash
-git clone <url-del-repo>
+git clone <repo-url>
 cd Speed-Rush-2D
 ```
 
-2. Instalar dependencias:
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Crear un archivo `.env` en el directorio raíz y agregar tu clave privada:
+3. Create a `.env` file in the root directory and add your private key:
 ```env
-PRIVATE_KEY=tu_clave_privada_aqui
+PRIVATE_KEY=your_private_key_here
 ```
 
-## Scripts de Gestión
+## Management Scripts
 
-### Mintear un Carro
+### Mint a Car
 ```bash
 npx hardhat run scripts/testMintCar.js --network lensTestnet
 ```
-Crea un nuevo carro con partes personalizadas.
+Creates a new car with custom parts.
 
-### Verificar Partes de un Carro
+### Check Car Parts
 ```bash
 npx hardhat run scripts/checkCarParts.js --network lensTestnet
 ```
-Muestra los detalles de las partes de un carro específico.
+Shows the details of a specific car's parts.
 
-### Reparar un Carro
+### Repair a Car
 ```bash
 npx hardhat run scripts/repairCar.js --network lensTestnet
 ```
-Repara un carro dañado en el taller.
+Repairs a damaged car at the workshop.
 
-## Funciones Principales
+## Main Functions
 
 ### CarNFT
-- `mintCar(string memory carImageURI, PartData[] calldata partsData)`: Mintea un nuevo carro con sus partes
-- `replacePart(uint256 carId, uint256 oldPartId, uint256 newPartId)`: Reemplaza una parte de un carro
-- `getCompactCarStats(uint256 carId)`: Obtiene las estadísticas de un carro
+- `mintCar(string memory carImageURI, PartData[] calldata partsData)`: Mints a new car with its parts
+- `replacePart(uint256 carId, uint256 oldPartId, uint256 newPartId)`: Replaces a car part
+- `getCompactCarStats(uint256 carId)`: Gets the stats of a car
 
 ### CarPart
-- `mint(address to, PartType partType, uint8 stat1, uint8 stat2, uint8 stat3, string memory imageURI)`: Mintea una nueva parte
-- `getPartStats(uint256 partId)`: Obtiene las estadísticas de una parte
+- `mint(address to, PartType partType, uint8 stat1, uint8 stat2, uint8 stat3, string memory imageURI)`: Mints a new part
+- `getPartStats(uint256 partId)`: Gets the stats of a part
 
 ### CarWorkshop
-- `repairCar(uint256 carId)`: Repara un carro dañado
-- `setRepairPrice(uint256 _newPrice)`: Establece el precio de reparación
+- `repairCar(uint256 carId)`: Repairs a damaged car
+- `setRepairPrice(uint256 _newPrice)`: Sets the repair price
 
-## Desarrollo
+## Development
 
-1. Compilar los contratos:
+1. Compile the contracts:
 ```bash
 npm run compile
 ```
 
-2. Desplegar en Lens Network Testnet:
+2. Deploy to Lens Network Testnet:
 ```bash
 npm run deploy
 ```
 
-## Configuración de Red
+## Network Configuration
 
-El proyecto está configurado para trabajar con Lens Network Testnet:
-- Nombre de la Red: Lens Network Sepolia Testnet
-- URL RPC: https://rpc.testnet.lens.dev
-- ID de Cadena: 37111
-- Explorador de Bloques: https://block-explorer.testnet.lens.dev
+The project is configured to work with Lens Network Testnet:
+- Network Name: Lens Network Sepolia Testnet
+- RPC URL: https://rpc.testnet.lens.dev
+- Chain ID: 37111
+- Block Explorer: https://block-explorer.testnet.lens.dev
 
-## Seguridad
+## Security
 
-- Los contratos utilizan implementaciones probadas de OpenZeppelin
-- Todas las funciones sensibles están protegidas con modificadores apropiados
-- Sistema de permisos entre contratos para operaciones seguras
+- Contracts use battle-tested OpenZeppelin implementations
+- All sensitive functions are protected with appropriate modifiers
+- Permission system between contracts for secure operations
 
-## Licencia
+## License
 
 MIT
 
-## Soporte
+## Support
 
-Para soporte, por favor abre un issue en el repositorio o contacta al equipo de desarrollo.
+For support, please open an issue in the repository or contact the development team.
