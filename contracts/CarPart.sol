@@ -27,7 +27,7 @@ contract CarPart is ERC721, Ownable {
     }
 
     modifier onlyCarContract() {
-        require(msg.sender == carContract, "Solo el contrato de carros puede llamar esta funcion");
+        require(msg.sender == carContract, "Only car contract can call this function");
         _;
     }
 
@@ -45,7 +45,7 @@ contract CarPart is ERC721, Ownable {
         string memory imageURI,
         uint256 carId
     ) external onlyCarContract returns (uint256) {
-        require(stat1 <= 10 && stat2 <= 10 && stat3 <= 10, "Las estadisticas deben ser <= 10");
+        require(stat1 <= 10 && stat2 <= 10 && stat3 <= 10, "Stats must be <= 10");
 
         uint256 partId = _currentPartId;
         _safeMint(to, partId);
@@ -65,12 +65,12 @@ contract CarPart is ERC721, Ownable {
     }
 
     function getPartStats(uint256 partId) external view returns (PartStats memory) {
-        require(_ownerOf(partId) != address(0), "La parte no existe");
+        require(_ownerOf(partId) != address(0), "Part does not exist");
         return _partStats[partId];
     }
 
     function getPartType(uint256 partId) external view returns (PartType) {
-        require(_ownerOf(partId) != address(0), "La parte no existe");
+        require(_ownerOf(partId) != address(0), "Part does not exist");
         return _partStats[partId].partType;
     }
 
@@ -78,7 +78,7 @@ contract CarPart is ERC721, Ownable {
         return _ownerOf(partId) != address(0);
     }
 
-    // Función auxiliar para convertir las estadísticas al formato antiguo para compatibilidad
+    // Helper function to convert stats to legacy format for compatibility
     function convertToLegacyStats(uint256 partId) external view returns (
         uint8 baseSpeed,
         uint8 baseAcceleration,
@@ -87,35 +87,35 @@ contract CarPart is ERC721, Ownable {
         uint8 baseTurnFactor,
         uint8 baseMaxSpeed
     ) {
-        require(_ownerOf(partId) != address(0), "La parte no existe");
+        require(_ownerOf(partId) != address(0), "Part does not exist");
         PartStats memory stats = _partStats[partId];
 
         if (stats.partType == PartType.ENGINE) {
-            // Motor: velocidad, velocidad máxima, aceleración
+            // Engine: speed, max speed, acceleration
             baseSpeed = stats.stat1;
             baseMaxSpeed = stats.stat2;
             baseAcceleration = stats.stat3;
-            // Valores por defecto para las demás estadísticas
+            // Default values for other stats
             baseHandling = 1;
             baseDriftFactor = 1;
             baseTurnFactor = 1;
         } 
         else if (stats.partType == PartType.TRANSMISSION) {
-            // Transmisión: aceleración, velocidad, manejo
+            // Transmission: acceleration, speed, handling
             baseAcceleration = stats.stat1;
             baseSpeed = stats.stat2;
             baseHandling = stats.stat3;
-            // Valores por defecto para las demás estadísticas
+            // Default values for other stats
             baseDriftFactor = 1;
             baseTurnFactor = 1;
-            baseMaxSpeed = stats.stat1; // La aceleración afecta la velocidad máxima
+            baseMaxSpeed = stats.stat1; // Acceleration affects max speed
         }
         else if (stats.partType == PartType.WHEELS) {
-            // Ruedas: manejo, derrape, giro
+            // Wheels: handling, drift, turn
             baseHandling = stats.stat1;
             baseDriftFactor = stats.stat2;
             baseTurnFactor = stats.stat3;
-            // Valores por defecto para las demás estadísticas
+            // Default values for other stats
             baseSpeed = 1;
             baseAcceleration = 1;
             baseMaxSpeed = 1;
