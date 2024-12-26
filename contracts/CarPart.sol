@@ -7,9 +7,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CarPart is ERC721URIStorage, Ownable {
     uint256 private _nextTokenId;
-    address public carContract;
+    address public carContract;  
 
-    enum PartType { ENGINE, TRANSMISSION, WHEELS, TIRES, SUSPENSION, STEERING, DIFFERENTIAL, CHASSIS }
+    enum PartType {
+        ENGINE,
+        TRANSMISSION,
+        WHEELS,
+        TIRES,
+        SUSPENSION,
+        STEERING,
+        DIFFERENTIAL,
+        CHASSIS
+    }
 
     struct PartStats {
         PartType partType;
@@ -34,11 +43,7 @@ contract CarPart is ERC721URIStorage, Ownable {
     }
 
     function exists(uint256 tokenId) public view returns (bool) {
-        try this.ownerOf(tokenId) returns (address) {
-            return true;
-        } catch {
-            return false;
-        }
+        return super._ownerOf(tokenId) != address(0);
     }
 
     function mint(
@@ -53,12 +58,22 @@ contract CarPart is ERC721URIStorage, Ownable {
         string memory imageURI,
         uint256 carId
     ) public returns (uint256) {
-        require(msg.sender == owner() || msg.sender == carContract, "Only owner or car contract can mint parts");
-        
+        require(
+            msg.sender == owner() || msg.sender == carContract,
+            "Only owner or car contract can mint parts"
+        );
+
+        require(baseSpeed <= 10, "Speed must be <= 10");
+        require(baseAcceleration <= 10, "Acceleration must be <= 10");
+        require(baseHandling <= 10, "Handling must be <= 10");
+        require(baseDriftFactor <= 10, "DriftFactor must be <= 10");
+        require(baseTurnFactor <= 10, "TurnFactor must be <= 10");
+        require(baseMaxSpeed <= 10, "MaxSpeed must be <= 10");
+
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, imageURI);
-        
+
         partStats[tokenId] = PartStats(
             partType,
             baseSpeed,
@@ -71,6 +86,7 @@ contract CarPart is ERC721URIStorage, Ownable {
         );
 
         partToCar[tokenId] = carId;
+
         return tokenId;
     }
 
@@ -104,4 +120,4 @@ contract CarPart is ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, newImageURI);
         partStats[tokenId].imageURI = newImageURI;
     }
-} 
+}
