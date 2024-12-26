@@ -9,11 +9,11 @@ async function generateCarFromBackend() {
         const response = await axios.post(
             'https://speed-rush-2d-backend-production.up.railway.app/api/cars/generate',
             {
-                prompt: "string",
-                style: "cartoon",
-                creatorType: "standard",
-                transmissionType: "manual",
-                wheelsType: "sport"
+                prompt: "sports car",
+                style: "realistic",
+                engineType: "v8",
+                transmissionType: "automatic",
+                wheelsType: "racing"
             }
         );
         console.log("Car generated successfully!");

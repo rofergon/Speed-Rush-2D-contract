@@ -4,7 +4,7 @@ const hre = require("hardhat");
 
 async function main() {
     // Deployed CarNFT contract address
-    const CAR_NFT_ADDRESS = "0xe7c761359F21fB1b4afDb2F37A7b24C9aF5CF4A9";
+    const CAR_NFT_ADDRESS = "0xdAA9A8c4876554b4679Dd52E76d7371Fa5F4F5a5";
 
     // Initialize provider and wallet
     const provider = new Provider("https://rpc.testnet.lens.dev");
