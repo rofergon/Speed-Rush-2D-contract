@@ -1,125 +1,137 @@
-# Lens Network NFT Contract
+# Speed Rush 2D - Sistema de NFTs
 
-A simple ERC-721 NFT contract deployed on the Lens Network Testnet that allows users to mint NFTs by paying with GRASS tokens.
+Un sistema de NFTs para el juego Speed Rush 2D desplegado en la Lens Network Testnet que permite a los usuarios crear y personalizar carros usando partes NFT.
 
-## Features
+## Características
 
-- Mintable NFTs with customizable price
-- Configurable base URI for NFT metadata
-- Owner-only administrative functions
-- Secure withdrawal mechanism
+- Sistema de partes de carro como NFTs (Motor, Transmisión, Ruedas)
+- Sistema de estadísticas dinámico donde cada parte contribuye a múltiples atributos
+- Taller de reparación para mantener los carros en buen estado
+- Sistema de degradación de carros durante las carreras
+- Tabla de clasificación para competencias
 
-## Contract Address
+## Contratos Desplegados
 
-The contract is deployed on Lens Network Testnet at:
-`0x51D967b80eaD6601630E0fA18b2101b90f1AB1d0`
+Los contratos están desplegados en Lens Network Testnet en las siguientes direcciones:
+- CarPart: `0x4bF1Cf69D3Cdc11dD7cBe0b1942Ce183f27FE402`
+- CarNFT: `0xEd0fA4fFDB1B33B6D6c6611B77F6806DB50b21aE`
+- CarWorkshop: `0x92cb777a96BE6f617959c8220388e4A046DA8669`
+- RaceLeaderboard: `0x9caEBCA084c2072904083008a0b3AE99068571b6`
 
-## Prerequisites
+## Sistema de Estadísticas
+
+### Motor (ENGINE)
+- stat1: Velocidad
+- stat2: Velocidad Máxima
+- stat3: Aceleración
+
+### Transmisión (TRANSMISSION)
+- stat1: Aceleración
+- stat2: Velocidad
+- stat3: Manejo
+
+### Ruedas (WHEELS)
+- stat1: Manejo
+- stat2: Derrape
+- stat3: Giro
+
+Cada estadística final del carro es afectada por al menos dos atributos de diferentes partes:
+- Velocidad: Motor (stat1) y Transmisión (stat2)
+- Velocidad Máxima: Motor (stat2) y Transmisión (stat1)
+- Aceleración: Motor (stat3) y Transmisión (stat1)
+- Manejo: Transmisión (stat3) y Ruedas (stat1)
+- Derrape: Ruedas (stat2) y Transmisión (stat3)
+- Giro: Ruedas (stat3) y Ruedas (stat2)
+
+## Prerequisitos
 
 - Node.js >= v16
-- npm or yarn
-- A wallet with GRASS tokens (Lens Network's native token)
+- npm o yarn
+- Una wallet con fondos en Lens Network Testnet
 
-## Installation
+## Instalación
 
-1. Clone the repository:
+1. Clonar el repositorio:
 ```bash
-git clone <your-repo-url>
-cd <your-repo-name>
+git clone <url-del-repo>
+cd Speed-Rush-2D
 ```
 
-2. Install dependencies:
+2. Instalar dependencias:
 ```bash
 npm install
 ```
 
-3. Create a `.env` file in the root directory and add your private key:
+3. Crear un archivo `.env` en el directorio raíz y agregar tu clave privada:
 ```env
-PRIVATE_KEY=your_private_key_here
+PRIVATE_KEY=tu_clave_privada_aqui
 ```
 
-## Contract Management Scripts
+## Scripts de Gestión
 
-The project includes several scripts to manage the NFT contract:
-
-### View Contract Information
+### Mintear un Carro
 ```bash
-node scripts/manage.js
+npx hardhat run scripts/testMintCar.js --network lensTestnet
 ```
-Shows current mint price, base URI, owner address, and contract balance.
+Crea un nuevo carro con partes personalizadas.
 
-### Change Mint Price
+### Verificar Partes de un Carro
 ```bash
-node scripts/setPrice.js <new_price>
+npx hardhat run scripts/checkCarParts.js --network lensTestnet
 ```
-Example: `node scripts/setPrice.js 0.05` sets the mint price to 0.05 GRASS.
+Muestra los detalles de las partes de un carro específico.
 
-### Set Base URI
+### Reparar un Carro
 ```bash
-node scripts/setURI.js <new_uri>
+npx hardhat run scripts/repairCar.js --network lensTestnet
 ```
-Example: `node scripts/setURI.js "ipfs://QmYourIPFSHash/"` sets the base URI for NFT metadata.
+Repara un carro dañado en el taller.
 
-### Withdraw Funds
+## Funciones Principales
+
+### CarNFT
+- `mintCar(string memory carImageURI, PartData[] calldata partsData)`: Mintea un nuevo carro con sus partes
+- `replacePart(uint256 carId, uint256 oldPartId, uint256 newPartId)`: Reemplaza una parte de un carro
+- `getCompactCarStats(uint256 carId)`: Obtiene las estadísticas de un carro
+
+### CarPart
+- `mint(address to, PartType partType, uint8 stat1, uint8 stat2, uint8 stat3, string memory imageURI)`: Mintea una nueva parte
+- `getPartStats(uint256 partId)`: Obtiene las estadísticas de una parte
+
+### CarWorkshop
+- `repairCar(uint256 carId)`: Repara un carro dañado
+- `setRepairPrice(uint256 _newPrice)`: Establece el precio de reparación
+
+## Desarrollo
+
+1. Compilar los contratos:
 ```bash
-node scripts/withdraw.js
+npm run compile
 ```
-Withdraws all GRASS tokens from the contract to the owner's address.
 
-## Contract Functions
-
-### For Users
-- `mint()`: Mint a new NFT by paying the current mint price in GRASS
-
-### For Contract Owner
-- `setMintPrice(uint256 _newPrice)`: Set a new mint price
-- `setBaseURI(string memory _newBaseURI)`: Set the base URI for NFT metadata
-- `withdraw()`: Withdraw accumulated GRASS tokens
-
-## Development
-
-1. Compile the contract:
+2. Desplegar en Lens Network Testnet:
 ```bash
-npx hardhat compile
+npm run deploy
 ```
 
-2. Deploy to Lens Network Testnet:
-```bash
-npx hardhat run scripts/deploy.js --network lensTestnet
-```
+## Configuración de Red
 
-3. Verify the contract:
-```bash
-npx hardhat verify --network lensTestnet <contract_address>
-```
+El proyecto está configurado para trabajar con Lens Network Testnet:
+- Nombre de la Red: Lens Network Sepolia Testnet
+- URL RPC: https://rpc.testnet.lens.dev
+- ID de Cadena: 37111
+- Explorador de Bloques: https://block-explorer.testnet.lens.dev
 
-## Network Configuration
+## Seguridad
 
-The project is configured to work with Lens Network Testnet:
-- Network Name: Lens Network Sepolia Testnet
-- RPC URL: https://rpc.testnet.lens.dev
-- Chain ID: 37111
-- Currency Symbol: GRASS
-- Block Explorer: https://block-explorer.testnet.lens.dev
+- Los contratos utilizan implementaciones probadas de OpenZeppelin
+- Todas las funciones sensibles están protegidas con modificadores apropiados
+- Sistema de permisos entre contratos para operaciones seguras
 
-## Security
-
-- The contract uses OpenZeppelin's battle-tested ERC721 and Ownable implementations
-- All sensitive functions are protected with `onlyOwner` modifier
-- Withdrawal function uses the recommended call pattern
-
-## License
+## Licencia
 
 MIT
 
-## Contributing
+## Soporte
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Support
-
-For support, please open an issue in the repository or contact the development team.
+Para soporte, por favor abre un issue en el repositorio o contacta al equipo de desarrollo.
