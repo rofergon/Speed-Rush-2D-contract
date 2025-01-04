@@ -9,6 +9,7 @@ contract CarNFT is ERC721, Ownable {
     struct CarComposition {
         uint256[] partIds;
         string carImageURI;
+        bool[] slotOccupied;
     }
 
     mapping(uint256 => CarComposition) private _cars;
@@ -23,6 +24,8 @@ contract CarNFT is ERC721, Ownable {
     event WorkshopSet(address indexed workshop);
     event LeaderboardSet(address indexed leaderboard);
     event MintPriceChanged(uint256 newPrice);
+    event PartUnequipped(uint256 indexed carId, uint256 indexed partId);
+    event PartEquipped(uint256 indexed carId, uint256 indexed partId, uint256 slotIndex);
 
     uint256 public mintPrice;
 
@@ -51,16 +54,16 @@ contract CarNFT is ERC721, Ownable {
         string imageURI;
     }
 
-    function mintCar(string memory carImageURI, PartData[] calldata partsData) external payable {
-        require(msg.value >= mintPrice, "Insufficient payment for minting");
-        require(partsData.length == 3, "A car must have exactly 3 parts");
+    function mintCar(string memory carImageURI, PartData[] memory partsData) external payable {
+        require(msg.value >= mintPrice, "Insufficient payment");
+        require(partsData.length <= 3, "Too many parts");
         
         uint256 carId = _currentCarId;
-        _safeMint(msg.sender, carId);
+        _mint(msg.sender, carId);
         
-        uint256[] memory partIds = new uint256[](partsData.length);
+        uint256[] memory partIds = new uint256[](3);
+        bool[] memory slotOccupied = new bool[](3);
         
-        // Verify we have one part of each type
         bool hasEngine = false;
         bool hasTransmission = false;
         bool hasWheels = false;
@@ -79,14 +82,23 @@ contract CarNFT is ERC721, Ownable {
                 partsData[i].imageURI,
                 carId
             );
-            partIds[i] = partId;
+            
+            // Asignar la parte al slot correcto según su tipo
+            uint256 slotIndex;
+            if (partsData[i].partType == CarPart.PartType.ENGINE) slotIndex = 0;
+            else if (partsData[i].partType == CarPart.PartType.TRANSMISSION) slotIndex = 1;
+            else slotIndex = 2;
+            
+            partIds[slotIndex] = partId;
+            slotOccupied[slotIndex] = true;
         }
 
         require(hasEngine && hasTransmission && hasWheels, "Car must have an engine, transmission, and wheels");
 
         _cars[carId] = CarComposition({
             partIds: partIds,
-            carImageURI: carImageURI
+            carImageURI: carImageURI,
+            slotOccupied: slotOccupied
         });
 
         _carConditions[carId] = 100; // New car, perfect condition
@@ -94,23 +106,77 @@ contract CarNFT is ERC721, Ownable {
         _currentCarId++;
     }
 
-    function getCarComposition(uint256 carId) external view returns (uint256[] memory partIds, string memory carImageURI) {
+    function unequipPart(uint256 carId, uint256 partId) external {
+        require(_ownerOf(carId) != address(0), "Car does not exist");
+        require(ownerOf(carId) == msg.sender, "Not the car owner");
+        require(carPartContract.ownerOf(partId) == msg.sender, "Not the owner of the part");
+        
+        CarComposition storage car = _cars[carId];
+        bool found = false;
+        uint256 partIndex;
+
+        for (uint256 i = 0; i < car.partIds.length; i++) {
+            if (car.partIds[i] == partId && car.slotOccupied[i]) {
+                partIndex = i;
+                found = true;
+                break;
+            }
+        }
+
+        require(found, "Part not found in this car");
+        require(carPartContract.getEquippedCar(partId) == carId, "Part is not equipped in this car");
+        
+        // Marcar el slot como vacío y actualizar el estado de la parte
+        car.slotOccupied[partIndex] = false;
+        carPartContract.setEquippedState(partId, 0);
+        
+        emit PartUnequipped(carId, partId);
+    }
+
+    function equipPart(uint256 carId, uint256 partId, uint256 slotIndex) external {
+        require(_ownerOf(carId) != address(0), "Car does not exist");
+        require(ownerOf(carId) == msg.sender, "Not the car owner");
+        require(carPartContract.ownerOf(partId) == msg.sender, "Not the owner of the part");
+        require(slotIndex < 3, "Invalid slot index");
+        require(!carPartContract.isEquipped(partId), "Part is already equipped in another car");
+        
+        CarComposition storage car = _cars[carId];
+        require(!car.slotOccupied[slotIndex], "Slot is already occupied");
+        
+        // Verificar que la parte sea del tipo correcto para el slot
+        CarPart.PartType partType = carPartContract.getPartType(partId);
+        require(
+            (slotIndex == 0 && partType == CarPart.PartType.ENGINE) ||
+            (slotIndex == 1 && partType == CarPart.PartType.TRANSMISSION) ||
+            (slotIndex == 2 && partType == CarPart.PartType.WHEELS),
+            "Part type does not match slot"
+        );
+        
+        car.partIds[slotIndex] = partId;
+        car.slotOccupied[slotIndex] = true;
+        carPartContract.setEquippedState(partId, carId);
+        
+        emit PartEquipped(carId, partId, slotIndex);
+    }
+
+    function getCarComposition(uint256 carId) external view returns (uint256[] memory partIds, string memory carImageURI, bool[] memory slotOccupied) {
         require(_ownerOf(carId) != address(0), "Car does not exist");
         CarComposition storage car = _cars[carId];
-        return (car.partIds, car.carImageURI);
+        return (car.partIds, car.carImageURI, car.slotOccupied);
     }
 
     function replacePart(uint256 carId, uint256 oldPartId, uint256 newPartId) external {
         require(_ownerOf(carId) != address(0), "Car does not exist");
         require(ownerOf(carId) == msg.sender, "Not the car owner");
         require(carPartContract.ownerOf(newPartId) == msg.sender, "Not the owner of the new part");
+        require(!carPartContract.isEquipped(newPartId), "New part is already equipped in another car");
 
         CarComposition storage car = _cars[carId];
         bool found = false;
         uint256 oldPartIndex;
 
         for (uint256 i = 0; i < car.partIds.length; i++) {
-            if (car.partIds[i] == oldPartId) {
+            if (car.partIds[i] == oldPartId && car.slotOccupied[i]) {
                 oldPartIndex = i;
                 found = true;
                 break;
@@ -118,13 +184,18 @@ contract CarNFT is ERC721, Ownable {
         }
 
         require(found, "Original part not found in this car");
+        require(carPartContract.getEquippedCar(oldPartId) == carId, "Old part is not equipped in this car");
 
         // Verify that the new part is of the same type as the old one
         CarPart.PartType oldType = carPartContract.getPartType(oldPartId);
         CarPart.PartType newType = carPartContract.getPartType(newPartId);
         require(oldType == newType, "New part must be of the same type as the original");
 
+        // Actualizar el estado de equipamiento de ambas partes
+        carPartContract.setEquippedState(oldPartId, 0);
+        carPartContract.setEquippedState(newPartId, carId);
         car.partIds[oldPartIndex] = newPartId;
+
         emit PartReplaced(carId, oldPartId, newPartId);
     }
 
@@ -312,12 +383,12 @@ contract CarNFT is ERC721, Ownable {
         // Adjust divisor based on number of contributors for each stat
         return CompactCarStats({
             imageURI: car.carImageURI,
-            speed: uint8((totalSpeed * multiplier) / (speedContributors * 100)),
-            acceleration: uint8((totalAcceleration * multiplier) / (accelerationContributors * 100)),
-            handling: uint8((totalHandling * multiplier) / (handlingContributors * 100)),
-            driftFactor: uint8((totalDriftFactor * multiplier) / (driftContributors * 100)),
-            turnFactor: uint8((totalTurnFactor * multiplier) / (turnContributors * 100)),
-            maxSpeed: uint8((totalMaxSpeed * multiplier) / (maxSpeedContributors * 100)),
+            speed: uint8(speedContributors > 0 ? (totalSpeed * multiplier) / (speedContributors * 100) : 1),
+            acceleration: uint8(accelerationContributors > 0 ? (totalAcceleration * multiplier) / (accelerationContributors * 100) : 1),
+            handling: uint8(handlingContributors > 0 ? (totalHandling * multiplier) / (handlingContributors * 100) : 1),
+            driftFactor: uint8(driftContributors > 0 ? (totalDriftFactor * multiplier) / (driftContributors * 100) : 1),
+            turnFactor: uint8(turnContributors > 0 ? (totalTurnFactor * multiplier) / (turnContributors * 100) : 1),
+            maxSpeed: uint8(maxSpeedContributors > 0 ? (totalMaxSpeed * multiplier) / (maxSpeedContributors * 100) : 1),
             condition: condition
         });
     }

@@ -16,11 +16,14 @@ contract CarPart is ERC721, Ownable {
     }
 
     mapping(uint256 => PartStats) private _partStats;
+    mapping(uint256 => uint256) private _equippedInCar; // ID de la parte -> ID del carro donde está equipada (0 si no está equipada)
     uint256 private _currentPartId;
     address public carContract;
 
     event PartMinted(uint256 indexed partId, PartType partType);
     event CarContractSet(address indexed carContract);
+    event PartEquipped(uint256 indexed partId, uint256 indexed carId);
+    event PartUnequipped(uint256 indexed partId, uint256 indexed carId);
 
     constructor() ERC721("CarPart", "PART") Ownable(msg.sender) {
         _currentPartId = 0;
@@ -58,7 +61,10 @@ contract CarPart is ERC721, Ownable {
             imageURI: imageURI
         });
 
+        // Al mintearse, la parte se equipa automáticamente en el carro
+        _equippedInCar[partId] = carId;
         emit PartMinted(partId, partType);
+        emit PartEquipped(partId, carId);
         _currentPartId++;
 
         return partId;
@@ -72,6 +78,29 @@ contract CarPart is ERC721, Ownable {
     function getPartType(uint256 partId) external view returns (PartType) {
         require(_ownerOf(partId) != address(0), "Part does not exist");
         return _partStats[partId].partType;
+    }
+
+    function isEquipped(uint256 partId) external view returns (bool) {
+        require(_ownerOf(partId) != address(0), "Part does not exist");
+        return _equippedInCar[partId] != 0;
+    }
+
+    function getEquippedCar(uint256 partId) external view returns (uint256) {
+        require(_ownerOf(partId) != address(0), "Part does not exist");
+        return _equippedInCar[partId];
+    }
+
+    function setEquippedState(uint256 partId, uint256 carId) external onlyCarContract {
+        require(_ownerOf(partId) != address(0), "Part does not exist");
+        if (carId == 0) {
+            // Desequipar
+            emit PartUnequipped(partId, _equippedInCar[partId]);
+        } else {
+            // Equipar
+            require(_equippedInCar[partId] == 0, "Part is already equipped in another car");
+            emit PartEquipped(partId, carId);
+        }
+        _equippedInCar[partId] = carId;
     }
 
     function exists(uint256 partId) external view returns (bool) {
