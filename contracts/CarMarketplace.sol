@@ -10,22 +10,22 @@ contract CarMarketplace is Ownable, ReentrancyGuard {
     CarNFT public carNFT;
     CarPart public carPart;
 
-    // Estructura para manejar los slots de partes que se venden con el carro
+    // Structure to handle part slots that are sold with the car
     struct PartSlot {
-        bool included;    // true si el slot se vende con el carro
-        uint256 partId;  // ID de la parte en ese slot (0 si no hay parte)
+        bool included;    // true if the slot is included in the sale
+        uint256 partId;  // ID of the part in that slot (0 if empty)
     }
 
-    // Estructura para un listado de carro
+    // Structure for a car listing
     struct CarListing {
         address seller;
         uint256 carId;
         uint256 price;
-        PartSlot[3] partSlots;  // Array fijo de 3 slots (motor, transmisión, ruedas)
+        PartSlot[3] partSlots;  // Fixed array of 3 slots (engine, transmission, wheels)
         bool active;
     }
 
-    // Estructura para un listado de parte individual
+    // Structure for an individual part listing
     struct PartListing {
         address seller;
         uint256 partId;
@@ -33,12 +33,12 @@ contract CarMarketplace is Ownable, ReentrancyGuard {
         bool active;
     }
 
-    // Mappings para almacenar los listados
+    // Mappings to store listings
     mapping(uint256 => CarListing) public carListings;     // carId => CarListing
     mapping(uint256 => PartListing) public partListings;   // partId => PartListing
     
-    // Comisión del marketplace (en porcentaje, ej: 250 = 2.5%)
-    uint256 public marketplaceFee = 250;  // 2.5% por defecto
+    // Marketplace fee (in percentage, e.g., 250 = 2.5%)
+    uint256 public marketplaceFee = 250;  // 2.5% default
 
     event CarListed(uint256 indexed carId, address indexed seller, uint256 price, bool[3] slotsIncluded);
     event PartListed(uint256 indexed partId, address indexed seller, uint256 price);
@@ -53,29 +53,29 @@ contract CarMarketplace is Ownable, ReentrancyGuard {
         _transferOwnership(msg.sender);
     }
 
-    // Función para listar un carro con sus partes seleccionadas
+    // Function to list a car with selected parts
     function listCar(
         uint256 carId,
         uint256 price,
         bool[3] memory includeSlots
     ) external {
-        require(carNFT.ownerOf(carId) == msg.sender, "No eres el dueno del carro");
-        require(price > 0, "El precio debe ser mayor a 0");
+        require(carNFT.ownerOf(carId) == msg.sender, "Not the car owner");
+        require(price > 0, "Price must be greater than 0");
         require(carNFT.isApprovedForAll(msg.sender, address(this)) || 
                 carNFT.getApproved(carId) == address(this), 
-                "El marketplace no tiene autorizacion para el carro");
+                "Marketplace not authorized for car");
 
-        // Obtener la composición actual del carro
+        // Get current car composition
         (uint256[] memory partIds, , bool[] memory slotOccupied) = carNFT.getCarComposition(carId);
 
         PartSlot[3] memory slots;
         for (uint256 i = 0; i < 3; i++) {
             if (includeSlots[i]) {
-                require(slotOccupied[i], "No puedes incluir un slot vacio");
-                require(carPart.ownerOf(partIds[i]) == msg.sender, "No eres dueno de todas las partes");
+                require(slotOccupied[i], "Cannot include empty slot");
+                require(carPart.ownerOf(partIds[i]) == msg.sender, "Not owner of all parts");
                 require(carPart.isApprovedForAll(msg.sender, address(this)) || 
                         carPart.getApproved(partIds[i]) == address(this), 
-                        "El marketplace no tiene autorizacion para las partes");
+                        "Marketplace not authorized for parts");
                 slots[i] = PartSlot({
                     included: true,
                     partId: partIds[i]
@@ -94,11 +94,11 @@ contract CarMarketplace is Ownable, ReentrancyGuard {
         emit CarListed(carId, msg.sender, price, includeSlots);
     }
 
-    // Función para listar una parte individual
+    // Function to list an individual part
     function listPart(uint256 partId, uint256 price) external {
-        require(carPart.ownerOf(partId) == msg.sender, "No eres el dueno de la parte");
-        require(price > 0, "El precio debe ser mayor a 0");
-        require(!carPart.isEquipped(partId), "La parte esta equipada en un carro");
+        require(carPart.ownerOf(partId) == msg.sender, "Not the part owner");
+        require(price > 0, "Price must be greater than 0");
+        require(!carPart.isEquipped(partId), "Part is equipped in a car");
 
         partListings[partId] = PartListing({
             seller: msg.sender,
@@ -110,30 +110,30 @@ contract CarMarketplace is Ownable, ReentrancyGuard {
         emit PartListed(partId, msg.sender, price);
     }
 
-    // Función para comprar un carro listado
+    // Function to buy a listed car
     function buyCar(uint256 carId) external payable nonReentrant {
         CarListing storage listing = carListings[carId];
-        require(listing.active, "Listado no activo");
-        require(msg.value >= listing.price, "Pago insuficiente");
+        require(listing.active, "Listing not active");
+        require(msg.value >= listing.price, "Insufficient payment");
 
         address seller = listing.seller;
-        require(seller != msg.sender, "No puedes comprar tu propio listado");
+        require(seller != msg.sender, "Cannot buy your own listing");
 
-        // Verificar que el vendedor aún sea dueño del carro y las partes
-        require(carNFT.ownerOf(carId) == seller, "El vendedor ya no es dueno del carro");
+        // Verify seller still owns car and parts
+        require(carNFT.ownerOf(carId) == seller, "Seller no longer owns the car");
         
         for (uint256 i = 0; i < 3; i++) {
             if (listing.partSlots[i].included) {
                 require(carPart.ownerOf(listing.partSlots[i].partId) == seller, 
-                    "El vendedor ya no es dueno de todas las partes");
+                    "Seller no longer owns all parts");
             }
         }
 
-        // Calcular comisión y pago al vendedor
+        // Calculate fee and payment to seller
         uint256 fee = (listing.price * marketplaceFee) / 10000;
         uint256 payment = listing.price - fee;
 
-        // Transferir NFTs
+        // Transfer NFTs
         carNFT.transferFrom(seller, msg.sender, carId);
         for (uint256 i = 0; i < 3; i++) {
             if (listing.partSlots[i].included) {
@@ -141,80 +141,80 @@ contract CarMarketplace is Ownable, ReentrancyGuard {
             }
         }
 
-        // Transferir pagos
+        // Transfer payments
         (bool success, ) = payable(seller).call{value: payment}("");
-        require(success, "Error al enviar el pago al vendedor");
+        require(success, "Error sending payment to seller");
 
-        // Desactivar listado
+        // Deactivate listing
         listing.active = false;
 
         emit CarSold(carId, seller, msg.sender, listing.price);
     }
 
-    // Función para comprar una parte listada
+    // Function to buy a listed part
     function buyPart(uint256 partId) external payable nonReentrant {
         PartListing storage listing = partListings[partId];
-        require(listing.active, "Listado no activo");
-        require(msg.value >= listing.price, "Pago insuficiente");
+        require(listing.active, "Listing not active");
+        require(msg.value >= listing.price, "Insufficient payment");
 
         address seller = listing.seller;
-        require(seller != msg.sender, "No puedes comprar tu propio listado");
-        require(carPart.ownerOf(partId) == seller, "El vendedor ya no es dueno de la parte");
+        require(seller != msg.sender, "Cannot buy your own listing");
+        require(carPart.ownerOf(partId) == seller, "Seller no longer owns the part");
 
-        // Calcular comisión y pago al vendedor
+        // Calculate fee and payment to seller
         uint256 fee = (listing.price * marketplaceFee) / 10000;
         uint256 payment = listing.price - fee;
 
-        // Transferir NFT
+        // Transfer NFT
         carPart.transferFrom(seller, msg.sender, partId);
 
-        // Transferir pago
+        // Transfer payment
         (bool success, ) = payable(seller).call{value: payment}("");
-        require(success, "Error al enviar el pago al vendedor");
+        require(success, "Error sending payment to seller");
 
-        // Desactivar listado
+        // Deactivate listing
         listing.active = false;
 
         emit PartSold(partId, seller, msg.sender, listing.price);
     }
 
-    // Función para cancelar un listado de carro
+    // Function to cancel a car listing
     function cancelCarListing(uint256 carId) external {
         CarListing storage listing = carListings[carId];
-        require(listing.active, "Listado no activo");
-        require(listing.seller == msg.sender, "No eres el vendedor");
+        require(listing.active, "Listing not active");
+        require(listing.seller == msg.sender, "Not the seller");
 
         listing.active = false;
         emit ListingCancelled(carId, true);
     }
 
-    // Función para cancelar un listado de parte
+    // Function to cancel a part listing
     function cancelPartListing(uint256 partId) external {
         PartListing storage listing = partListings[partId];
-        require(listing.active, "Listado no activo");
-        require(listing.seller == msg.sender, "No eres el vendedor");
+        require(listing.active, "Listing not active");
+        require(listing.seller == msg.sender, "Not the seller");
 
         listing.active = false;
         emit ListingCancelled(partId, false);
     }
 
-    // Función para actualizar la comisión del marketplace (solo owner)
+    // Function to update marketplace fee (owner only)
     function setMarketplaceFee(uint256 newFee) external onlyOwner {
-        require(newFee <= 1000, "Comision maxima 10%");
+        require(newFee <= 1000, "Maximum fee is 10%");
         marketplaceFee = newFee;
         emit MarketplaceFeeUpdated(newFee);
     }
 
-    // Función para retirar las comisiones acumuladas (solo owner)
+    // Function to withdraw accumulated fees (owner only)
     function withdrawFees() external onlyOwner {
         uint256 balance = address(this).balance;
-        require(balance > 0, "No hay fondos para retirar");
+        require(balance > 0, "No funds to withdraw");
         
         (bool success, ) = payable(owner()).call{value: balance}("");
-        require(success, "Error al retirar fondos");
+        require(success, "Error withdrawing funds");
     }
 
-    // Función auxiliar para verificar aprobaciones
+    // Helper function to check approvals
     function checkCarApproval(address owner, uint256 carId) public view returns (bool) {
         return carNFT.isApprovedForAll(owner, address(this)) || 
                carNFT.getApproved(carId) == address(this);
@@ -225,7 +225,7 @@ contract CarMarketplace is Ownable, ReentrancyGuard {
                carPart.getApproved(partId) == address(this);
     }
 
-    // Función para obtener el estado de aprobación de un carro y sus partes
+    // Function to get approval status for a car and its parts
     function getListingApprovalStatus(uint256 carId, bool[3] memory includeSlots) external view returns (
         bool carApproved,
         bool[] memory partsApproved

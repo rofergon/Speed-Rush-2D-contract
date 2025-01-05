@@ -23,15 +23,15 @@ contract CarWorkshop is Ownable {
     }
     
     function repairCar(uint256 carId) external payable {
-        require(msg.value >= repairPrice, "Pago insuficiente");
-        require(carNFT.ownerOf(carId) == msg.sender, "No eres el dueno del carro");
+        require(msg.value >= repairPrice, "Insufficient payment");
+        require(carNFT.ownerOf(carId) == msg.sender, "Not the car owner");
         
         carNFT.repairCar(carId);
         
-        // Devolver el exceso de pago usando call
+        // Return excess payment using call
         if (msg.value > repairPrice) {
             (bool success, ) = payable(msg.sender).call{value: msg.value - repairPrice}("");
-            require(success, "Error al devolver el exceso de pago");
+            require(success, "Error returning excess payment");
         }
 
         emit CarRepaired(carId);
@@ -40,6 +40,6 @@ contract CarWorkshop is Ownable {
     function withdrawFunds() external onlyOwner {
         uint256 balance = address(this).balance;
         (bool success, ) = payable(owner()).call{value: balance}("");
-        require(success, "Error al retirar los fondos");
+        require(success, "Error withdrawing funds");
     }
 } 
