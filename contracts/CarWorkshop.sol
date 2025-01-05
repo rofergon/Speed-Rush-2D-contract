@@ -11,9 +11,10 @@ contract CarWorkshop is Ownable {
     event CarRepaired(uint256 indexed carId);
     event RepairPriceChanged(uint256 newPrice);
     
-    constructor(address _carNFT, uint256 _repairPrice) Ownable(msg.sender) {
+    constructor(address _carNFT, uint256 _repairPrice) {
         carNFT = ICarNFT(_carNFT);
         repairPrice = _repairPrice;
+        _transferOwnership(msg.sender);
     }
     
     function setRepairPrice(uint256 _newPrice) external onlyOwner {

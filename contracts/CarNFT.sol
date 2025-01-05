@@ -29,10 +29,11 @@ contract CarNFT is ERC721, Ownable {
 
     uint256 public mintPrice;
 
-    constructor(address _carPartContractAddress) ERC721("CarNFT", "CAR") Ownable(msg.sender) {
+    constructor(address _carPartContractAddress) ERC721("CarNFT", "CAR") {
         carPartContract = CarPart(_carPartContractAddress);
         _currentCarId = 1;
         mintPrice = 0.01 ether; // Initial minting price
+        _transferOwnership(msg.sender);
     }
 
     function setMintPrice(uint256 _newPrice) external onlyOwner {

@@ -17,9 +17,10 @@ contract RaceLeaderboard is ERC721, Ownable {
     uint256 private _nextTokenId;
     mapping(uint256 => RaceResult) public raceResults;
 
-    constructor(address _carNFT) ERC721("RaceResult", "RACE") Ownable(msg.sender) {
+    constructor(address _carNFT) ERC721("RaceResult", "RACE") {
         carNFT = CarNFT(_carNFT);
         _nextTokenId = 1;
+        _transferOwnership(msg.sender);
     }
 
     function mintRaceResult(uint256 carId, uint256 time) external returns (uint256) {

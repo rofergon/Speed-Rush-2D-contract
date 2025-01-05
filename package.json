@@ -9,7 +9,6 @@
     "deploy": "hardhat run scripts/deployCarSystem.js --network lensTestnet"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.0",
     "axios": "^1.7.9",
     "dotenv": "^16.3.1"
   },
@@ -17,6 +16,7 @@
     "@matterlabs/hardhat-zksync-deploy": "^1.6.0",
     "@matterlabs/hardhat-zksync-solc": "^1.0.6",
     "@matterlabs/hardhat-zksync-verify": "^1.2.0",
+    "@openzeppelin/contracts": "^4.9.3",
     "ethers": "^6.13.4",
     "hardhat": "^2.19.3",
     "zksync-ethers": "^6.11.2"

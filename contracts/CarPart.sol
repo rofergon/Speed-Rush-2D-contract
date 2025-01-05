@@ -25,8 +25,9 @@ contract CarPart is ERC721, Ownable {
     event PartEquipped(uint256 indexed partId, uint256 indexed carId);
     event PartUnequipped(uint256 indexed partId, uint256 indexed carId);
 
-    constructor() ERC721("CarPart", "PART") Ownable(msg.sender) {
+    constructor() ERC721("CarPart", "PART") {
         _currentPartId = 0;
+        _transferOwnership(msg.sender);
     }
 
     modifier onlyCarContract() {

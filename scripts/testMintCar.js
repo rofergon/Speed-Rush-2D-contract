@@ -1,21 +1,31 @@
-const { Wallet, Provider, Contract } = require("zksync-ethers");
+const { Wallet, Provider, Contract, utils } = require("zksync-ethers");
 const { Deployer } = require("@matterlabs/hardhat-zksync-deploy");
 const hre = require("hardhat");
 
 async function main() {
-    // Recently deployed CarNFT contract address
-    const CAR_NFT_ADDRESS = "0x33Cf5229318c39d7F754ccbB8FAf61c6470e85dc";
+    // Direcciones de los contratos desplegados
+    const CAR_NFT_ADDRESS = "0x0F6cdE471bBdA5a59d33e55C676ede09fC4aA16e";
+    const CAR_PART_ADDRESS = "0x1B6E32D29800479d9F3fa56D75A835F5633147DC";
+    const MARKETPLACE_ADDRESS = "0xfb10ab4Ef5AcF3d064857C20a4df79Fe3Ca0b8C9";
 
     // Initialize provider and wallet
     const provider = new Provider("https://rpc.testnet.lens.dev");
     const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
     const deployer = new Deployer(hre, wallet);
 
-    // Load contract
+    // Load contracts
     const carNFTArtifact = await deployer.loadArtifact("CarNFT");
-    const carNFT = new Contract(CAR_NFT_ADDRESS, carNFTArtifact.abi, wallet);
+    const carPartArtifact = await deployer.loadArtifact("CarPart");
+    const marketplaceArtifact = await deployer.loadArtifact("CarMarketplace");
 
-    console.log("Testing mintCar with contract at:", CAR_NFT_ADDRESS);
+    const carNFT = new Contract(CAR_NFT_ADDRESS, carNFTArtifact.abi, wallet);
+    const carPart = new Contract(CAR_PART_ADDRESS, carPartArtifact.abi, wallet);
+    const marketplace = new Contract(MARKETPLACE_ADDRESS, marketplaceArtifact.abi, wallet);
+
+    console.log("Testing mintCar and marketplace listing with contracts:");
+    console.log("CarNFT:", CAR_NFT_ADDRESS);
+    console.log("CarPart:", CAR_PART_ADDRESS);
+    console.log("Marketplace:", MARKETPLACE_ADDRESS);
 
     // Test data for the car
     const carImageURI = "https://example.com/car2.jpg";
@@ -55,78 +65,78 @@ async function main() {
         console.log("Wallet balance before minting:", balanceAntes.toString(), "wei");
 
         console.log("\nAttempting to mint a new car...");
-        console.log("\nPart Details:");
-        console.log("\nEngine:");
-        console.log("- Speed:", partsData[0].stat1);
-        console.log("- Max Speed:", partsData[0].stat2);
-        console.log("- Acceleration:", partsData[0].stat3);
+        console.log("\nPart Details:", partsData);
 
-        console.log("\nTransmission:");
-        console.log("- Acceleration:", partsData[1].stat1);
-        console.log("- Speed:", partsData[1].stat2);
-        console.log("- Handling:", partsData[1].stat3);
-
-        console.log("\nWheels:");
-        console.log("- Handling:", partsData[2].stat1);
-        console.log("- Drift:", partsData[2].stat2);
-        console.log("- Turn:", partsData[2].stat3);
-
-        // Estimate required gas
-        const gasEstimado = await carNFT.mintCar.estimateGas(carImageURI, partsData, {
-            value: mintPrice
-        });
-        console.log("\nEstimated gas:", gasEstimado.toString());
-
-        // Get gas price
-        const gasPrice = await provider.getGasPrice();
-        console.log("Gas price:", gasPrice.toString(), "wei");
-
-        // Calculate total cost (mint price + gas)
-        const costoGas = BigInt(gasEstimado) * BigInt(gasPrice);
-        console.log("Gas cost:", costoGas.toString(), "wei");
-        console.log("Total cost (mint + gas):", (BigInt(mintPrice) + costoGas).toString(), "wei");
-
-        // Mint the car sending required value
+        // Mint the car
         const tx = await carNFT.mintCar(carImageURI, partsData, {
             value: mintPrice,
-            gasLimit: BigInt(Math.floor(Number(gasEstimado) * 1.1)) // Add 10% margin
+            gasLimit: 5000000 // Gas limit fijo para asegurar
         });
-        console.log("\nTransaction sent:", tx.hash);
+        console.log("\nMint transaction sent:", tx.hash);
         
-        // Wait for confirmation and get receipt
+        // Wait for confirmation
         const receipt = await tx.wait();
-        console.log("\nTransaction confirmed!");
-        console.log("Gas used:", receipt.gasUsed?.toString() || "N/A");
-        console.log("Effective gas price:", receipt.effectiveGasPrice?.toString() || "N/A");
-        
-        const costoGasReal = receipt.gasUsed && receipt.effectiveGasPrice ? 
-            (BigInt(receipt.gasUsed) * BigInt(receipt.effectiveGasPrice)).toString() : 
-            "Not available";
-        console.log("Total gas cost:", costoGasReal, "wei");
-
-        // Get balance after minting
-        const balanceDespues = await provider.getBalance(wallet.address);
-        console.log("\nWallet balance after minting:", balanceDespues.toString(), "wei");
-        console.log("Total operation cost:", (balanceAntes - balanceDespues).toString(), "wei");
+        console.log("\nMint transaction confirmed!");
 
         // Get the last minted car ID
-        const carId = 2; // This will be the second car
-        console.log("\nGetting stats for car ID:", carId);
+        const carId = await carNFT.getLastTokenId();
+        console.log("\nMinted car ID:", carId.toString());
 
-        // Get and display car stats
-        const stats = await carNFT.getCompactCarStats(carId);
-        console.log("\nFinal car stats (combining all parts):");
-        console.log("Speed:", stats.speed.toString());
-        console.log("Acceleration:", stats.acceleration.toString());
-        console.log("Handling:", stats.handling.toString());
-        console.log("Drift Factor:", stats.driftFactor.toString());
-        console.log("Turn Factor:", stats.turnFactor.toString());
-        console.log("Max Speed:", stats.maxSpeed.toString());
-        console.log("Condition:", stats.condition.toString());
-        console.log("Image URI:", stats.imageURI);
+        // Get car composition to verify parts
+        const [partIds, , slotOccupied] = await carNFT.getCarComposition(carId);
+        console.log("\nCar composition:");
+        console.log("Part IDs:", partIds.map(id => id.toString()));
+        console.log("Slots occupied:", slotOccupied);
+
+        console.log("\nApproving NFTs for marketplace...");
+        
+        // Aprobar el carro para el marketplace
+        const approveTxCar = await carNFT.approve(MARKETPLACE_ADDRESS, carId);
+        await approveTxCar.wait();
+        console.log("Car approved for marketplace");
+
+        // Aprobar todas las partes para el marketplace
+        for (let i = 0; i < partIds.length; i++) {
+            if (slotOccupied[i]) {
+                const approveTxPart = await carPart.approve(MARKETPLACE_ADDRESS, partIds[i]);
+                await approveTxPart.wait();
+                console.log(`Part ${partIds[i]} approved for marketplace`);
+            }
+        }
+
+        // Preparar el listado en el marketplace
+        const listingPrice = BigInt("100000000000000000"); // 0.1 ETH en wei
+        const includeSlots = [true, true, true]; // Incluir todas las partes
+
+        console.log("\nListing car in marketplace...");
+        console.log("Listing price:", listingPrice.toString(), "wei");
+        console.log("Including all slots:", includeSlots);
+
+        // Verificar aprobaciones antes de listar
+        const approvalStatus = await marketplace.getListingApprovalStatus(carId, includeSlots);
+        console.log("\nApproval status:");
+        console.log("Car approved:", approvalStatus[0]);
+        console.log("Parts approved:", approvalStatus[1]);
+
+        // Listar en el marketplace
+        const listTx = await marketplace.listCar(carId, listingPrice, includeSlots, {
+            gasLimit: 5000000
+        });
+        console.log("\nListing transaction sent:", listTx.hash);
+        
+        const listReceipt = await listTx.wait();
+        console.log("\nListing transaction confirmed!");
+
+        // Verificar el listado
+        const listing = await marketplace.carListings(carId);
+        console.log("\nListing details:");
+        console.log("Seller:", listing.seller);
+        console.log("Price:", listing.price.toString(), "wei");
+        console.log("Active:", listing.active);
+        console.log("Part slots:", listing.partSlots);
 
     } catch (error) {
-        console.error("Error minting car:", error);
+        console.error("Error in process:", error);
         throw error;
     }
 }

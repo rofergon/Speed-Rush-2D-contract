@@ -37,5 +37,12 @@ module.exports = {
       verifyURL: "https://block-explorer.testnet.lens.dev/contract_verification",
       accounts: [process.env.PRIVATE_KEY]
     }
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
+    node_modules: "./node_modules"
   }
 };

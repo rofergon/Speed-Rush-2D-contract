@@ -99,7 +99,15 @@ async function main() {
     addresses.raceLeaderboard = await raceLeaderboard.getAddress();
     console.log(`✅ RaceLeaderboard desplegado en: ${addresses.raceLeaderboard}`);
 
-    // 6. Configurar CarNFT
+    // 6. Desplegar CarMarketplace
+    console.log("\n📦 Desplegando CarMarketplace...");
+    const carMarketplaceArtifact = await deployer.loadArtifact("CarMarketplace");
+    const carMarketplace = await deployer.deploy(carMarketplaceArtifact, [addresses.carNFT, addresses.carPart]);
+    await carMarketplace.waitForDeployment();
+    addresses.carMarketplace = await carMarketplace.getAddress();
+    console.log(`✅ CarMarketplace desplegado en: ${addresses.carMarketplace}`);
+
+    // 7. Configurar CarNFT
     console.log("\n⚙️ Configurando CarNFT...");
     const tx2 = await carNFT.setWorkshopContract(addresses.carWorkshop);
     await tx2.wait();
@@ -116,8 +124,9 @@ async function main() {
       
       await verifyContract(addresses.carPart, []);
       await verifyContract(addresses.carNFT, [addresses.carPart]);
-      await verifyContract(addresses.carWorkshop, [addresses.carNFT, addresses.repairPrice]);
+      await verifyContract(addresses.carWorkshop, [addresses.carNFT, repairPrice]);
       await verifyContract(addresses.raceLeaderboard, [addresses.carNFT]);
+      await verifyContract(addresses.carMarketplace, [addresses.carNFT, addresses.carPart]);
     }
 
     console.log("\n✨ Despliegue completado exitosamente!");
