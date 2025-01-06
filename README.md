@@ -4,7 +4,7 @@ An NFT system for the Speed Rush 2D game deployed on the Lens Network Testnet th
 
 ## Features
 
-- Cars and parts as NFTs (Engine, Transmission, Wheels)
+- Cars and parts as NFTs (Engine, Transmission, Core)
 - Dynamic stats system where each part contributes to multiple attributes
 - Advanced part tracking system for equipped and unequipped parts
 - Detailed metadata system for cars and parts
@@ -35,7 +35,7 @@ The contracts are deployed on Lens Network Testnet at the following addresses:
 - stat2: Speed
 - stat3: Handling
 
-### Wheels
+### Core and Alternative Skin
 - stat1: Handling
 - stat2: Drift
 - stat3: Turn
@@ -89,7 +89,7 @@ PRIVATE_KEY=your_private_key_here
 BUYER_PRIVATE_KEY=buyer_private_key_here
 ```
 
-## Management Scripts
+## Management Test Scripts
 
 ### Mint a Car
 ```bash
