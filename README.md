@@ -6,6 +6,9 @@ An NFT system for the Speed Rush 2D game deployed on the Lens Network Testnet th
 
 - Cars and parts as NFTs (Engine, Transmission, Wheels)
 - Dynamic stats system where each part contributes to multiple attributes
+- Advanced part tracking system for equipped and unequipped parts
+- Detailed metadata system for cars and parts
+- Configurable car minting price
 - Repair workshop to maintain cars in good condition
 - Car degradation system during races
 - Race leaderboard system
@@ -14,11 +17,11 @@ An NFT system for the Speed Rush 2D game deployed on the Lens Network Testnet th
 ## Deployed Contracts
 
 The contracts are deployed on Lens Network Testnet at the following addresses:
-- CarPart: `0x4bF1Cf69D3Cdc11dD7cBe0b1942Ce183f27FE402`
-- CarNFT: `0xEd0fA4fFDB1B33B6D6c6611B77F6806DB50b21aE`
-- CarWorkshop: `0x92cb777a96BE6f617959c8220388e4A046DA8669`
-- RaceLeaderboard: `0x9caEBCA084c2072904083008a0b3AE99068571b6`
-- CarMarketplace: `0xfb10ab4Ef5AcF3d064857C20a4df79Fe3Ca0b8C9`
+- CarPart: `0xCA4E04724234D99122C01268a8a0cD722450c67E`
+- CarNFT: `0x95dA1E4C0961295ED0D1F316474c1a3a6E868349`
+- CarWorkshop: `0xf2BBd1BEDB23915Ab77cd69265eaD8D442C10980`
+- RaceLeaderboard: `0xD75aA67d5Bb1f8aCA77b4d14da847C28CdEE9a0D`
+- CarMarketplace: `0x73b378F1368D9aC0394AB1C8aB85EFB3e4216DcC`
 
 ## Stats System
 
@@ -113,11 +116,20 @@ Swaps engines between two cars.
 - `replacePart(uint256 carId, uint256 oldPartId, uint256 newPartId)`: Replaces a car part
 - `unequipPart(uint256 carId, uint256 partId)`: Unequips a part
 - `equipPart(uint256 carId, uint256 partId, uint256 slotIndex)`: Equips a part
-- `getCompactCarStats(uint256 carId)`: Gets the stats of a car
+- `getCompactCarStats(uint256 carId)`: Gets the basic stats of a car
+- `getFullCarMetadata(uint256 carId)`: Gets detailed metadata including all parts and stats
+- `setMintPrice(uint256 _newPrice)`: Sets the minting price for new cars
+- `withdrawFunds()`: Allows owner to withdraw accumulated mint fees
+- `getLastTokenId()`: Gets the last minted car token ID
 
 ### CarPart
 - `mint(address to, PartType partType, uint8 stat1, uint8 stat2, uint8 stat3, string memory imageURI)`: Mints a new part
 - `getPartStats(uint256 partId)`: Gets the stats of a part
+- `getOwnerParts(address owner)`: Gets all parts owned by an address
+- `getOwnerPartsByType(address owner, PartType partType)`: Gets all parts of a specific type owned by an address
+- `getOwnerEquippedParts(address owner)`: Gets all equipped parts owned by an address
+- `getOwnerUnequippedParts(address owner)`: Gets all unequipped parts owned by an address
+- `getOwnerPartsWithDetails(address owner)`: Gets detailed information about all parts owned by an address
 
 ### CarMarketplace
 - `listCar(uint256 carId, uint256 price, bool[3] memory includeSlots)`: Lists a car for sale

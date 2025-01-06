@@ -15,10 +15,17 @@ contract CarPart is ERC721, Ownable {
         string imageURI;
     }
 
+    // Core storage
     mapping(uint256 => PartStats) private _partStats;
-    mapping(uint256 => uint256) private _equippedInCar; // ID de la parte -> ID del carro donde está equipada (0 si no está equipada)
+    mapping(uint256 => uint256) private _equippedInCar; // partId => carId (0 if not equipped)
     uint256 private _currentPartId;
     address public carContract;
+
+    // New mappings for better part tracking
+    mapping(address => uint256[]) private _ownerParts;                // owner => all their partIds
+    mapping(address => mapping(PartType => uint256[])) private _ownerPartsByType;  // owner => type => partIds
+    mapping(address => uint256[]) private _ownerEquippedParts;        // owner => their equipped partIds
+    mapping(address => uint256[]) private _ownerUnequippedParts;      // owner => their unequipped partIds
 
     event PartMinted(uint256 indexed partId, PartType partType);
     event CarContractSet(address indexed carContract);
@@ -62,8 +69,10 @@ contract CarPart is ERC721, Ownable {
             imageURI: imageURI
         });
 
-        // Al mintearse, la parte se equipa automáticamente en el carro
+        // When minted, the part is automatically equipped in the car
         _equippedInCar[partId] = carId;
+        _addToOwnerArrays(to, partId);
+        
         emit PartMinted(partId, partType);
         emit PartEquipped(partId, carId);
         _currentPartId++;
@@ -71,6 +80,134 @@ contract CarPart is ERC721, Ownable {
         return partId;
     }
 
+    // Override _transfer to update owner mappings
+    function _transfer(address from, address to, uint256 tokenId) internal virtual override {
+        super._transfer(from, to, tokenId);
+        
+        // Remove from old owner's arrays
+        if (from != address(0)) {
+            _removeFromOwnerArrays(from, tokenId);
+        }
+        
+        // Add to new owner's arrays
+        _addToOwnerArrays(to, tokenId);
+    }
+
+    function _addToOwnerArrays(address owner, uint256 partId) internal {
+        PartStats memory stats = _partStats[partId];
+        
+        // Add to general parts array
+        _ownerParts[owner].push(partId);
+        
+        // Add to type-specific array
+        _ownerPartsByType[owner][stats.partType].push(partId);
+        
+        // Add to equipped/unequipped array
+        if (_equippedInCar[partId] == 0) {
+            _ownerUnequippedParts[owner].push(partId);
+        } else {
+            _ownerEquippedParts[owner].push(partId);
+        }
+    }
+
+    function _removeFromOwnerArrays(address owner, uint256 partId) internal {
+        // Remove from general parts array
+        _removeFromArray(_ownerParts[owner], partId);
+        
+        // Remove from type-specific array
+        PartStats memory stats = _partStats[partId];
+        _removeFromArray(_ownerPartsByType[owner][stats.partType], partId);
+        
+        // Remove from equipped/unequipped array
+        if (_equippedInCar[partId] == 0) {
+            _removeFromArray(_ownerUnequippedParts[owner], partId);
+        } else {
+            _removeFromArray(_ownerEquippedParts[owner], partId);
+        }
+    }
+
+    function _removeFromArray(uint256[] storage array, uint256 value) internal {
+        for (uint i = 0; i < array.length; i++) {
+            if (array[i] == value) {
+                array[i] = array[array.length - 1];
+                array.pop();
+                break;
+            }
+        }
+    }
+
+    function setEquippedState(uint256 partId, uint256 carId) external onlyCarContract {
+        require(_ownerOf(partId) != address(0), "Part does not exist");
+        address owner = ownerOf(partId);
+        
+        // If part was unequipped and is now being equipped
+        if (_equippedInCar[partId] == 0 && carId != 0) {
+            _removeFromArray(_ownerUnequippedParts[owner], partId);
+            _ownerEquippedParts[owner].push(partId);
+            emit PartEquipped(partId, carId);
+        }
+        // If part was equipped and is now being unequipped
+        else if (_equippedInCar[partId] != 0 && carId == 0) {
+            _removeFromArray(_ownerEquippedParts[owner], partId);
+            _ownerUnequippedParts[owner].push(partId);
+            emit PartUnequipped(partId, _equippedInCar[partId]);
+        }
+        
+        _equippedInCar[partId] = carId;
+    }
+
+    // Query functions for frontend
+    function getOwnerParts(address owner) external view returns (uint256[] memory) {
+        return _ownerParts[owner];
+    }
+
+    function getOwnerPartsByType(address owner, PartType partType) external view returns (uint256[] memory) {
+        return _ownerPartsByType[owner][partType];
+    }
+
+    function getOwnerEquippedParts(address owner) external view returns (uint256[] memory) {
+        return _ownerEquippedParts[owner];
+    }
+
+    function getOwnerUnequippedParts(address owner) external view returns (uint256[] memory) {
+        return _ownerUnequippedParts[owner];
+    }
+
+    function getOwnerPartsWithDetails(address owner) external view returns (
+        PartStats[] memory allParts,
+        PartStats[] memory equippedParts,
+        PartStats[] memory unequippedParts,
+        uint256[] memory equippedInCarIds
+    ) {
+        uint256[] memory allPartIds = _ownerParts[owner];
+        uint256[] memory equippedPartIds = _ownerEquippedParts[owner];
+        uint256[] memory unequippedPartIds = _ownerUnequippedParts[owner];
+
+        allParts = new PartStats[](allPartIds.length);
+        equippedParts = new PartStats[](equippedPartIds.length);
+        unequippedParts = new PartStats[](unequippedPartIds.length);
+        equippedInCarIds = new uint256[](equippedPartIds.length);
+
+        // Fill all parts
+        for (uint i = 0; i < allPartIds.length; i++) {
+            allParts[i] = _partStats[allPartIds[i]];
+        }
+
+        // Fill equipped parts
+        for (uint i = 0; i < equippedPartIds.length; i++) {
+            equippedParts[i] = _partStats[equippedPartIds[i]];
+            equippedInCarIds[i] = _equippedInCar[equippedPartIds[i]];
+        }
+
+        // Fill unequipped parts
+        for (uint i = 0; i < unequippedPartIds.length; i++) {
+            unequippedParts[i] = _partStats[unequippedPartIds[i]];
+        }
+
+        return (allParts, equippedParts, unequippedParts, equippedInCarIds);
+    }
+
+    // Existing utility functions
     function getPartStats(uint256 partId) external view returns (PartStats memory) {
         require(_ownerOf(partId) != address(0), "Part does not exist");
         return _partStats[partId];
@@ -89,19 +226,6 @@ contract CarPart is ERC721, Ownable {
     function getEquippedCar(uint256 partId) external view returns (uint256) {
         require(_ownerOf(partId) != address(0), "Part does not exist");
         return _equippedInCar[partId];
-    }
-
-    function setEquippedState(uint256 partId, uint256 carId) external onlyCarContract {
-        require(_ownerOf(partId) != address(0), "Part does not exist");
-        if (carId == 0) {
-            // Desequipar
-            emit PartUnequipped(partId, _equippedInCar[partId]);
-        } else {
-            // Equipar
-            require(_equippedInCar[partId] == 0, "Part is already equipped in another car");
-            emit PartEquipped(partId, carId);
-        }
-        _equippedInCar[partId] = carId;
     }
 
     function exists(uint256 partId) external view returns (bool) {
