@@ -1,5 +1,5 @@
 # Dependencias
-node_modules
+node_modules/
 vendor/
 /build/
 dist/
@@ -45,8 +45,10 @@ client/docs/tmp-swagger-gen/
 vagrant/
 .vagrant/
 *.box
-devnet/
-xion-data/
+
+# Mantener directorios importantes
+!xion/
+!xion-contracts/
 
 # Archivos temporales y de construcción
 tools-stamp
