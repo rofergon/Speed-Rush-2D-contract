@@ -1,0 +1,21 @@
+# Rust specific
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# Build artifacts
+/artifacts/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Misc
+.DS_Store
+*.env
+
+# Keep important files
+!Cargo.toml
+!src/
+!xion doc.pdf 
