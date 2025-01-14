@@ -5,22 +5,15 @@ go 1.22.7
 replace (
 	cosmossdk.io/core => cosmossdk.io/core v0.11.1
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
-
-	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
-	// See: https://github.com/cosmos/cosmos-sdk/issues/13134
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
-	// Fix upstream GHSA-h395-qcrw-5vmq vulnerability.
-	// See: https://github.com/cosmos/cosmos-sdk/issues/10409
-	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.8.1
-
+	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.1
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/larry0x/abstract-account => github.com/burnt-labs/abstract-account v0.0.0-20241017182826-e40d245c944a
 	github.com/strangelove-ventures/tokenfactory => github.com/strangelove-ventures/tokenfactory v0.50.3-wasmvm2
-
-	// pin version! 126854af5e6d has issues with the store so that queries fail
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
-
 	github.com/vektra/mockery/v2 => github.com/vektra/mockery/v2 v2.14.0
+	golang.org/x/crypto => golang.org/x/crypto v0.21.0
+	golang.org/x/net => golang.org/x/net v0.22.0
 )
 
 require (
