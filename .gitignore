@@ -13,59 +13,37 @@ dist/
 .idea/
 *.swp
 *.swo
-*.swl
-*.swm
-*.swn
-*.iml
 
 # Archivos de compilación y caché
-/cache/
-/artifacts/
-/typechain/
-/typechain-types/
-tools/bin/*
-examples/build/*
+cache/
+artifacts/
+typechain/
+typechain-types/
 
-# Archivos de cobertura y testing
+# Target y exclusiones específicas para xion-contracts
+target/
+!/xion-contracts/src/
+!/xion-contracts/Cargo.toml
+!/xion-contracts/Cargo.lock
+
+# Archivos de testing y cobertura
 coverage/
-coverage.txt
 coverage.json
-profile.out
 *.test
 
-# Documentación generada
-docs/_build/
-docs/tutorial/
-docs/node_modules/
-client/docs/node_modules/
-client/docs/tmp-swagger-gen/
-
-# Archivos de desarrollo
+# Archivos temporales
 *.log
-vagrant/
 .vagrant/
 *.box
-
-# Mantener directorios importantes
-!xion/
-!xion-contracts/
-
-# Archivos temporales y de construcción
-tools-stamp
-dependency-graph.png
-contract_tests/*
+devnet/
 
 # Archivos de Hardhat
-/cache/
-/artifacts/
-ignition/deployments/chain-31337/
+cache/
+artifacts/
+cache-zk/
+artifacts-zk/
 
-# Archivos Go
-go.work
-go.work.sum
-/integration_tests/integration_tests.test
-
-# Archivos LaTeX
+# Otros
 *.aux
 *.out
-*.synctex.gz
+*.gz

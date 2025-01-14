@@ -1,0 +1,51 @@
+syntax = "proto3";
+package xion.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+
+option go_package = "github.com/burnt-labs/xion/x/xion/types";
+
+service Query {
+  rpc WebAuthNVerifyRegister(QueryWebAuthNVerifyRegisterRequest) returns (QueryWebAuthNVerifyRegisterResponse) {}
+  rpc WebAuthNVerifyAuthenticate(QueryWebAuthNVerifyAuthenticateRequest) returns (QueryWebAuthNVerifyAuthenticateResponse) {}
+  rpc PlatformPercentage(QueryPlatformPercentageRequest) returns (QueryPlatformPercentageResponse) {}
+  rpc PlatformMinimum(QueryPlatformMinimumRequest) returns (QueryPlatformMinimumResponse) {}
+}
+
+message QueryWebAuthNVerifyRegisterRequest {
+  string addr = 1;
+  string challenge = 2;
+  string rp = 3;
+  bytes data = 4;
+}
+
+message QueryWebAuthNVerifyRegisterResponse {
+  bytes credential = 1;
+}
+
+message QueryWebAuthNVerifyAuthenticateRequest {
+  string addr = 1;
+  string challenge = 2;
+  string rp = 3;
+  bytes credential = 4;
+  bytes data = 5;
+}
+
+message QueryWebAuthNVerifyAuthenticateResponse {}
+
+message QueryPlatformPercentageRequest {}
+
+message QueryPlatformPercentageResponse {
+  uint64 platform_percentage = 1;
+}
+
+message QueryPlatformMinimumRequest {}
+
+message QueryPlatformMinimumResponse {
+  repeated cosmos.base.v1beta1.Coin minimums = 3 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
