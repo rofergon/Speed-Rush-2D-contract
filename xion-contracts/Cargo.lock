@@ -959,6 +959,7 @@ dependencies = [
  "cw721-base 0.18.0",
  "schemars",
  "serde",
+ "serde_json",
  "thiserror",
 ]
 

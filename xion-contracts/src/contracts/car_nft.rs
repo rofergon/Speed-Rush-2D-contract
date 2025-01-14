@@ -162,6 +162,9 @@ pub fn execute(
         ExecuteMsg::UnequipPart { car_id, part_id } => {
             execute_unequip_part(deps, env, info, contract, car_id, part_id)
         },
+        ExecuteMsg::SetMintPrice { price } => {
+            execute_set_mint_price(deps, info, contract, price)
+        },
         // TODO: Implementar el resto de las funciones de ejecución
         _ => unimplemented!()
     }
@@ -211,6 +214,20 @@ fn execute_unequip_part(
 ) -> StdResult<Response> {
     // TODO: Implementar la lógica de desequipar partes
     unimplemented!()
+}
+
+fn execute_set_mint_price(
+    deps: DepsMut,
+    _info: MessageInfo,
+    contract: CarNftContract,
+    price: Uint128,
+) -> StdResult<Response> {
+    // Guardar el nuevo precio
+    contract.mint_price.save(deps.storage, &price)?;
+    
+    Ok(Response::new()
+        .add_attribute("method", "set_mint_price")
+        .add_attribute("new_price", price.to_string()))
 }
 
 // Funciones de consulta
