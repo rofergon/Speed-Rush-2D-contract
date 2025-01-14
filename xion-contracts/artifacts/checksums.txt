@@ -1,0 +1,1 @@
+cc1bcb6b966d1fc66f57903241a86f66ba05f3c0f0abeccc35590fb45cbd8746  xion_contracts.wasm

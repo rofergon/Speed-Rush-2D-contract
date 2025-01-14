@@ -1,17 +1,120 @@
+# Dependencias
 node_modules
+vendor/
+/build/
+dist/
+
+# Archivos de entorno y configuración
 .env
+*.env
+.env.*
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swl
+*.swm
+*.swn
+*.iml
 
-# Hardhat files
-/cache
-/artifacts
+# Archivos de compilación y caché
+/cache/
+/artifacts/
+/typechain/
+/typechain-types/
+tools/bin/*
+examples/build/*
 
-# TypeChain files
-/typechain
-/typechain-types
+# Archivos de cobertura y testing
+coverage/
+coverage.txt
+coverage.json
+profile.out
+*.test
 
-# solidity-coverage files
-/coverage
-/coverage.json
+# Documentación generada
+docs/_build/
+docs/tutorial/
+docs/node_modules/
+client/docs/node_modules/
+client/docs/tmp-swagger-gen/
 
-# Hardhat Ignition default folder for deployments against a local node
-ignition/deployments/chain-31337
+# Archivos de desarrollo
+*.log
+vagrant/
+.vagrant/
+*.box
+devnet/
+xion-data/
+
+# Archivos temporales y de construcción
+tools-stamp
+dependency-graph.png
+contract_tests/*
+
+# Archivos de Hardhat
+/cache/
+/artifacts/
+ignition/deployments/chain-31337/
+
+# Archivos Go
+go.work
+go.work.sum
+/integration_tests/integration_tests.test
+
+# Archivos LaTeX
+*.aux
+*.out
+*.synctex.gz
+
+# Archivos adicionales a ignorar
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swl
+*.swm
+*.swn
+*.iml
+
+# Build y distribución
+/build/
+/dist/
+vendor/
+tools/bin/*
+examples/build/*
+
+# Documentación
+docs/_build/
+docs/tutorial/
+docs/node_modules/
+client/docs/node_modules/
+client/docs/tmp-swagger-gen/
+
+# Desarrollo
+*.log
+vagrant/
+.vagrant/
+*.box
+devnet/
+xion-data/
+tools-stamp
+dependency-graph.png
+contract_tests/*
+
+# Testing adicional
+coverage.txt
+profile.out
+*.test
+
+# Go
+go.work
+go.work.sum
+/integration_tests/integration_tests.test
+
+# LaTeX
+*.aux
+*.out
+*.synctex.gz
