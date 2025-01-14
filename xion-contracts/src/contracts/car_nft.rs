@@ -108,6 +108,7 @@ pub enum QueryMsg {
         car_id: u64,
     },
     GetLastTokenId {},
+    GetMintPrice {},
 }
 
 // Respuestas de consulta
@@ -177,6 +178,10 @@ pub fn query(
     match msg {
         QueryMsg::GetCarComposition { car_id } => {
             to_json_binary(&query_car_composition(deps, contract, car_id)?)
+        },
+        QueryMsg::GetMintPrice {} => {
+            let price = contract.mint_price.load(deps.storage)?;
+            to_json_binary(&price)
         },
         // TODO: Implementar el resto de las funciones de consulta
         _ => unimplemented!()
