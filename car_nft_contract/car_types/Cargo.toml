@@ -1,0 +1,8 @@
+[package]
+name = "car_types"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+schemars = "0.8.10"
+serde = { version = "1.0.145", features = ["derive"] } 
